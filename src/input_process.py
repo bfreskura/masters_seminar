@@ -83,8 +83,12 @@ def _char_to_onehot(chr, chr_id_mapping):
 
 def embed_chars(data, max_word_size=20):
     """
-
-    :param data:
+    Embed dataset on a character level. Each character is represented as a
+    one-hot vector.
+    :param max_word_size: Words with length less than this are padded with zeros
+    and words with greater length are trimmed to max_word_size.
+    :param data: List of sentences where each sentence consists of (token, pos_tag)
+    pairs
     :return:
     """
     chars = []
@@ -127,7 +131,7 @@ def embed_chars(data, max_word_size=20):
 
 def embed_words(data, embedding="glove", timestep=constants.TIMESTEP):
     """
-    Create embedded dataset and exports it to a pickle file
+    Create word embedded dataset and exports it to a pickle file
     :param timestep: Maximum sentence length after embedding
     :param embedding: Embedding type
     :return:
