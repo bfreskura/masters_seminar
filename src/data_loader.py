@@ -3,13 +3,11 @@ Parsing datasets
 """
 
 import nltk
-from nltk.corpus import treebank
-import IPython
 
 
 def parse_WJS(data_dir):
     """
-    Parsed the WJS treebank
+    Parses the WJS treebank dataset
     :param data_dir:
     :return:
     """
