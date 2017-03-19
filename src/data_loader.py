@@ -12,10 +12,13 @@ def parse_WJS(data_dir):
     :return:
     """
     parsed_sents = []
+    avg = 0
     reader = nltk.corpus.BracketParseCorpusReader(data_dir, ".*mrg")
     sentences = reader.parsed_sents()
     for sent in sentences:
         new_sent = [(s.leaves()[0], s.label()) for s in
                     sent.subtrees(lambda t: t.height() == 2)]
         parsed_sents.append(new_sent)
+        avg += len(new_sent)
+    print("Average sentence length: ", avg // len(sentences))
     return parsed_sents

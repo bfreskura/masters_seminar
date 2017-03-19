@@ -1,13 +1,12 @@
 import os
 
 import numpy as np
-import IPython
 
 import constants
 import utils
 
 
-def _embed_glove(data, glove_file):
+def _embed_glove(data, glove_file, timestep):
     """
     Creates word embedding using the Glove 100 vectors.
     :param data: List of sentences where each sentence consists of (token, pos_tag)
@@ -15,6 +14,7 @@ def _embed_glove(data, glove_file):
     :return: List of sentences which contain (token, tag, embedding) triplets
     """
     embed_dict = dict()
+    glove_vec_size = 100
 
     # Load glove hashmap
     print("Loading Glove vectors, may take a while")
@@ -34,21 +34,43 @@ def _embed_glove(data, glove_file):
                 new_sent.append((token, tag, embed_dict[token]))
             except:
                 print("Word", token, "does not exist in the glove vector")
-        embed_data.append(new_sent)
+
+        # Adjust sentence length so it fits into a LSTM net
+        if len(new_sent) > timestep:
+            new_sent = new_sent[:timestep]
+            embed_data.append(new_sent)
+        elif len(new_sent) < timestep:
+            for _ in range(timestep - len(new_sent)):
+                new_sent.append(
+                    ("NULL", "NULL", np.zeros(glove_vec_size, dtype=np.float)))
+            embed_data.append(new_sent)
+        else:
+            embed_data.append(new_sent)
+
+        assert len(new_sent) == timestep, "Mismatch in timestep size"
+
     return embed_data
 
 
-def embed_words(data, embedding="glove"):
+def _embed_w2vec(data, export_file):
+    raise NotImplementedError
+
+
+def embed_words(data, embedding="glove", timestep=constants.TIMESTEP):
     """
     Create embedded dataset and exports it to a pickle file
+    :param timestep: Maximum sentence length after embedding
     :param embedding: Embedding type
     :return:
     """
     if embedding.lower() == "glove":
         embeddings = _embed_glove(data,
                                   os.path.join(constants.RESOURCES, "glove_100",
-                                               "glove.6B.100d.txt"))
-        utils.export_pickle(constants.WJS_DATA, "wjs_treebank_glove_100", embeddings)
+                                               "glove.6B.100d.txt"),
+                                  timestep=timestep)
+        utils.export_pickle(constants.WJS_DATA,
+                            "wjs_treebank_glove_100_t" + str(timestep),
+                            embeddings)
     elif embedding.lower() == "word2vec":
         pass
     else:
