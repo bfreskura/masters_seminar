@@ -94,7 +94,8 @@ ENV/
 .ropeproject
 *.idea/
 
-data/
+src/data/
+src/resources/
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
