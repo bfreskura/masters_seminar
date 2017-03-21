@@ -69,25 +69,45 @@ def _construct_mappings(chars):
     return id_chr, chr_id
 
 
-def _char_to_onehot(chr, chr_id_mapping):
+def _construct_random_mappings(chars, char_embed_dim=30):
+    """
+    Creates a [char -> random vector] hashmap
+    :param chars: List of all characters in a corpus
+    :return: Char -> random vector hashmap
+    """
+    # Get unique chars
+    char_set = set(chars)
+
+    # Create randomly initialized character embeddings of shape
+    # (unique_chrs, word_length). Using initialization from the paper.
+    chr_vecs = np.random.uniform(-np.sqrt(3 / char_embed_dim),
+                                 np.sqrt(3 / char_embed_dim),
+                                 size=(len(char_set), char_embed_dim))
+    chr_id = {chr: id for id, chr in zip(chr_vecs, char_set)}
+    return chr_id
+
+
+def _char_to_onehot(chr, chr_mapping):
     """
     Convert character to a one hot representation
     :param chr: Character
-    :param chr_id_mapping: character to id map
+    :param chr_mapping: Character mapping hash-map
     :return:
     """
-    vector = np.zeros(len(chr_id_mapping), dtype=np.uint8)
-    vector[chr_id_mapping[chr]] = 1
+    vector = np.zeros(len(chr_mapping), dtype=np.uint8)
+    vector[chr_mapping[chr]] = 1
     return vector
 
 
-def embed_chars(data, max_word_size=20):
+def embed_chars(data, max_word_size=20, char_embed_dim=30):
     """
     Embed dataset on a character level. Each character is represented as a
-    one-hot vector. Exports embedding to a pickle file.
+    random char_embed_dim dimensional vector. Exports embedding to a pickle file.
     Final list item structure is the following:
-    (sentence_length, num_unique_chrs, max_wordsize)
+    (sentence_length, char_embed_dim, max_word_size)
 
+    :param char_embed_dim: Character embeddings vector dimension. 30 is set
+    according to the paper.
     :param max_word_size: Words with length less than this are padded with zeros
     and words with greater length are trimmed to max_word_size.
     :param data: List of sentences where each sentence consists of (token, pos_tag)
@@ -95,24 +115,26 @@ def embed_chars(data, max_word_size=20):
     :return:
     """
     chars = []
-    # Create mappings
     for sent in data:
         for token, _ in sent:
             chars.extend(token)
-    id_chr, chr_id = _construct_mappings(chars)
+    chr_rvec = _construct_random_mappings(chars)
 
-    # Convert to one hot
     new_sents = []
     for sent in data:
         sentence = []
         for token, tag in sent:
-            char_embeddings = np.zeros((len(id_chr), max_word_size))
-            chr_vecs = np.array([_char_to_onehot(c, chr_id) for c in token]).T
+            char_embeddings = np.zeros((char_embed_dim, max_word_size),
+                                       dtype=np.float32)
+
+            # Convert char to embedded mappings
+            chr_vecs = np.array([chr_rvec[c] for c in token]).T
 
             # Trim if the max word size is exceeded
             if chr_vecs.shape[1] > max_word_size:
                 char_embeddings = chr_vecs[:, :max_word_size]
 
+            # Put the vector in the center if it doesn't fit the frame
             elif chr_vecs.shape[1] < max_word_size:
                 pad_size = (max_word_size - chr_vecs.shape[1]) // 2
                 for i in range(chr_vecs.shape[1]):
@@ -121,14 +143,16 @@ def embed_chars(data, max_word_size=20):
             else:
                 char_embeddings = chr_vecs
 
-            assert char_embeddings.shape[0] == len(id_chr)
+            assert char_embeddings.shape[0] == char_embed_dim
             assert char_embeddings.shape[1] == max_word_size
             sentence.append(np.array(char_embeddings))
 
         new_sents.append(np.array(sentence))
 
+    # Export to pickle file
     utils.export_pickle(constants.WJS_DATA,
-                        "wjs_treebank_char_embedding" + str(max_word_size),
+                        "wjs_treebank_char_embedding" + str(
+                            max_word_size),
                         np.array(new_sents))
 
 

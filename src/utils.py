@@ -15,6 +15,7 @@ def export_pickle(dir, name, object):
     """
     with open(os.path.join(dir, name + ".pkl"), mode="wb") as f:
         pickle.dump(file=f, obj=object)
+        print("Pickle exported to", os.path.join(dir, name + ".pkl"))
 
 
 def load_pickle(path):

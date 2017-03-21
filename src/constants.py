@@ -1,4 +1,6 @@
 import os
+import numpy as np
+
 
 ROOT = os.path.dirname(__file__)
 
@@ -19,4 +21,3 @@ MAX_WORD_SIZE = 20
 
 # Dataset and resources
 GLOVE_WIKI = "http://nlp.stanford.edu/data/glove.6B.zip"
-
