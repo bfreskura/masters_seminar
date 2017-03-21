@@ -84,7 +84,10 @@ def _char_to_onehot(chr, chr_id_mapping):
 def embed_chars(data, max_word_size=20):
     """
     Embed dataset on a character level. Each character is represented as a
-    one-hot vector.
+    one-hot vector. Exports embedding to a pickle file.
+    Final list item structure is the following:
+    (sentence_length, num_unique_chrs, max_wordsize)
+
     :param max_word_size: Words with length less than this are padded with zeros
     and words with greater length are trimmed to max_word_size.
     :param data: List of sentences where each sentence consists of (token, pos_tag)

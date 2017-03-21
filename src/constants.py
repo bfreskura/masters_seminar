@@ -16,3 +16,7 @@ WJS_DATA_DIR = "/home/bartol/nltk_data/corpora/treebank/combined"
 # Average sentence size
 TIMESTEP = 25
 MAX_WORD_SIZE = 20
+
+# Dataset and resources
+GLOVE_WIKI = "http://nlp.stanford.edu/data/glove.6B.zip"
+
