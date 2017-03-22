@@ -64,7 +64,8 @@ def _construct_mappings(data):
     :return:
     """
     unique_set = set(data)
-    return {chr: id for id, chr in zip(range(len(unique_set)), unique_set)}
+    return {chr: id for id, chr in
+            zip(range(1, len(unique_set) + 1), unique_set)}
 
 
 def _construct_random_mappings(chars, char_embed_dim=30):
@@ -95,6 +96,70 @@ def _item_to_onehot(item, item_mappings):
     vector = np.zeros(len(item_mappings), dtype=np.uint8)
     vector[item_mappings[item]] = 1
     return vector
+
+
+def create_char_mappings(data,
+                         max_word_size=constants.MAX_WORD_SIZE,
+                         timestep=constants.TIMESTEP):
+    """
+    Create characters mappings in the following manner:
+    1) Map each character to its id
+    2) Split the sentence into words
+    3) For each word, map each char to its ID, and pad for the max_word_size
+    4) Do this for every word in the sentence
+    5) Join vectors for one sentence to create a (1, timestep*max_word_size) vector
+    6) Repeat 2) - 4) for every sentence
+    7) Join everything together and to obtain a
+     (num_sentences, timestep*max_word_size) matrix
+
+    :param data: Dataset
+    :param max_word_size: Maximum word length
+    :param timestep: Maximum Sentence length
+    :return:
+    """
+    chars = []
+    for sent in data:
+        for token, tag in sent:
+            chars.extend(token)
+
+    chr_rvec = _construct_mappings(chars)
+    sentences = []
+    for sent in data:
+        new_sent = np.zeros(timestep * max_word_size, dtype=np.uint8)
+
+        new_sent_temp = []
+        for token, _ in sent:
+            char_embeddings = np.zeros(max_word_size, dtype=np.uint8)
+            char_mapped = np.array([chr_rvec[c] for c in token])
+
+            if len(char_mapped) > max_word_size:
+                char_embeddings = char_mapped[:max_word_size]
+            elif len(char_mapped) < max_word_size:
+                pad_size = (max_word_size - len(char_mapped)) // 2
+                for i in range(len(char_mapped)):
+                    char_embeddings[i + pad_size] = char_mapped[i]
+            else:
+                char_embeddings = char_mapped
+            new_sent_temp.extend(char_embeddings)
+
+        new_sent_temp = np.array(new_sent_temp)
+        if len(new_sent_temp) > timestep * max_word_size:
+            new_sent = new_sent_temp[:len(new_sent)]
+
+        elif len(new_sent_temp) < timestep * max_word_size:
+            new_sent[:len(new_sent_temp)] = new_sent_temp
+        else:
+            new_sent = new_sent_temp
+
+        sentences.append(new_sent)
+
+    sentences = np.array(sentences)
+    assert sentences.shape[0] == len(data)
+    assert sentences.shape[1] == timestep * max_word_size
+
+    # Export to pickle
+    utils.export_pickle(constants.WJS_DATA,
+                        "wjs_char_id", np.array(sentences))
 
 
 def embed_chars(data,

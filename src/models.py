@@ -38,12 +38,14 @@ class CNN_BILSTM():
         """
         char_embed = tf.Variable(
             tf.random_uniform(
-                [self.batch_size,
-                 self.timestep * self.max_word_size,
+                [self.max_word_size,
                  self.char_features],
                 minval=-np.sqrt(3 / self.char_features),
                 maxval=np.sqrt(3 / self.char_features)),
         )
+
+        net =  tf.nn.embedding_lookup(char_embed, self.word_embedding_input)
+        print(net)
 
         # CONVOLUTION on character level
         net = tf.layers.conv1d(

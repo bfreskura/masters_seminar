@@ -15,7 +15,7 @@ def main():
     # wjs_data = data_loader.parse_WJS(constants.WJS_DATA_DIR)
     # input_process.embed_words(wjs_data)
     # input_process.embed_chars(wjs_data)
-
+    # input_process.create_char_mappings(wjs_data)
 
     treebank = utils.load_pickle(os.path.join(constants.WJS_DATA,
                                               "wjs_treebank_glove_100_t" + str(
@@ -24,7 +24,9 @@ def main():
                                               "wjs_treebank_pos_tags_one_hot_" + str(
                                                   constants.MAX_WORD_SIZE) + ".pkl"))
 
-    # Shuffle
+    chr_embds = utils.load_pickle(os.path.join(constants.WJS_DATA, "wjs_char_id.pkl"))
+
+    # # Shuffle
     treebank, pos_tags = utils.shuffle_data(treebank, pos_tags)
 
     train_word, valid_word = treebank[:3000], treebank[3000:]
@@ -53,7 +55,7 @@ def main():
                 batch_size=config['batch_size'])
 
 
-if __name__ == "__main__":
+    if __name__ == "__main__":
     # For results consistency
-    np.random.seed(1337)
+        np.random.seed(1337)
     main()
