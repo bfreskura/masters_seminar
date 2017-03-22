@@ -1,14 +1,11 @@
 import os
 
-import IPython
 import numpy as np
 
 import constants
-import data_loader
-import utils
-import input_process
-import train
 import models
+import train
+import utils
 
 
 def main():
@@ -26,7 +23,7 @@ def main():
     chr_embds = utils.load_pickle(
         os.path.join(constants.WJS_DATA, "wjs_char_id.pkl"))
 
-    # # Shuffle
+    # Shuffle
     chr_embds, treebank, pos_tags = utils.shuffle_data(chr_embds, treebank,
                                                        pos_tags)
 
@@ -35,7 +32,7 @@ def main():
     train_label, valid_label = pos_tags[:3000], pos_tags[3000:]
 
     config = {
-        "lr": 1e-3,
+        "lr": 1e-2,
         "optimizer": "Adam",
         "timestep": constants.TIMESTEP,
         "word_vector": 100,
@@ -46,9 +43,9 @@ def main():
         "n_classes": pos_tags.shape[2],
         "batch_size": 32,
     }
+    model = models.CNN_BILSTM_CRF(config)
 
-    model = models.CNN_BILSTM(config)
-
+    print("CONFIG:", config)
     train.train(train_word=train_word,
                 valid_word=valid_word,
                 train_chr=train_chr,

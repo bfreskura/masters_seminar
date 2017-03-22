@@ -1,9 +1,8 @@
 """
 Model training and evaluation
 """
-import tensorflow as tf
-import IPython
 import numpy as np
+import tensorflow as tf
 
 import utils
 
@@ -37,12 +36,14 @@ def train(train_word,
                  model.word_embedding_input: word,
                  model.labels: label})
 
-            if b % 20 == 0:
+            if b % 40 == 0:
                 print("Iteration {}/{}, Batch Loss {:.4f}".format(
                     b * batch_size, num_batches * batch_size, loss))
 
         eval(model, valid_chr, valid_word, valid_label)
         print("Finished epoch {}\n".format(epoch + 1))
+
+        # TODO Add model saving
 
 
 def eval(model, chr, word, label):

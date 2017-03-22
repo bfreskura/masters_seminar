@@ -3,9 +3,10 @@ import tensorflow as tf
 from tensorflow.contrib import rnn
 
 
-class CNN_BILSTM():
+class CNN_BILSTM_CRF():
     """
-    Creates a CNN -> BI-LSTM model architecture
+    Creates a CNN -> BI-LSTM -> CRF model architecture.
+    Reference paper: https://arxiv.org/abs/1603.01354
     """
 
     def __init__(self, config):
@@ -37,6 +38,7 @@ class CNN_BILSTM():
         self.labels = tf.placeholder(tf.float32,
                                      (None, self.timestep, self.n_classes))
 
+        # Char embedding layer
         char_embed = tf.Variable(
             tf.random_uniform(
                 [self.max_word_size * self.timestep,
@@ -47,7 +49,7 @@ class CNN_BILSTM():
         net = tf.nn.embedding_lookup(char_embed, self.char_embedding_input)
         net = tf.layers.dropout(net, rate=0.5)
 
-        # CONVOLUTION on character level
+        # 1-D Convolution on a character level
         net = tf.layers.conv1d(
             inputs=net,
             filters=self.cnn_filter,
@@ -63,11 +65,11 @@ class CNN_BILSTM():
         net = tf.reshape(net, [-1, self.timestep, self.cnn_filter * 10],
                          name="reshape1")
 
-        # Concat word and char-cnn embeddings
+        # Concatenate word and char-cnn embeddings
         net = tf.concat([self.word_embedding_input, net], axis=2,
                         name="concat1")
 
-        # Apply dropout and prepare input for the LSTM net
+        # Apply dropout and prepare input for the BI-LSTM net
         net = tf.layers.dropout(net, rate=0.5)
         net = tf.reshape(net, [-1, self.cnn_filter * 10 + self.word_embd_vec],
                          name="reshape2")
@@ -85,9 +87,8 @@ class CNN_BILSTM():
             'out': tf.Variable(tf.random_normal([self.n_classes]))
         }
 
-        # Forward direction cell
+        # Forward and backward direction cell
         lstm_fw_cell = rnn.BasicLSTMCell(self.lstm_hidden, forget_bias=1.0)
-        # Backward direction cell
         lstm_bw_cell = rnn.BasicLSTMCell(self.lstm_hidden, forget_bias=1.0)
 
         net, _, _ = rnn.static_bidirectional_rnn(cell_fw=lstm_fw_cell,
@@ -98,17 +99,18 @@ class CNN_BILSTM():
         # Linear activation, using rnn inner loop on all outputs
         pred = [tf.layers.dropout(tf.matmul(n, weights['out']) + biases['out'],
                                   rate=0.5) for n in net]
-        # Softmax probabilites
 
         # TODO add CRF layer
 
         pred = tf.reshape(pred, [-1, self.timestep, self.n_classes])
+
+        # Softmax probabilities
         self.softmax = tf.nn.softmax(pred)
 
-        # Define loss
+        # Define loss and optimizer
         self.loss = tf.reduce_mean(
             tf.nn.softmax_cross_entropy_with_logits(logits=pred,
                                                     labels=self.labels))
-
+        # TODO add decay
         self.train_op = tf.train.AdamOptimizer(
             learning_rate=self.learning_rate).minimize(self.loss)
