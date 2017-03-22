@@ -20,13 +20,16 @@ class CNN_BILSTM():
         self.n_classes = config["n_classes"]
         self.sess = tf.Session()
 
-        # Architecture
         """
         Word embeddings input of size (batch_size, timestep, word_embed_dim)
         """
         self.word_embedding_input = tf.placeholder(tf.float32,
                                                    (None, self.timestep,
                                                     self.word_embd_vec))
+        """
+        Character embeddings input of size (batch_size, max_sentence_length
+         (a.k.a. timestep) * max_word_size)
+        """
         self.char_embedding_input = tf.placeholder(tf.int32,
                                                    (None,
                                                     self.timestep * self.max_word_size))
@@ -34,10 +37,6 @@ class CNN_BILSTM():
         self.labels = tf.placeholder(tf.float32,
                                      (None, self.timestep, self.n_classes))
 
-        """
-        Character embeddings input of size (batch_size, max_sentence_length
-         (a.k.a. timestep), char_embedding_vector_size, max_word_size)
-        """
         char_embed = tf.Variable(
             tf.random_uniform(
                 [self.max_word_size * self.timestep,
@@ -68,12 +67,11 @@ class CNN_BILSTM():
         net = tf.concat([self.word_embedding_input, net], axis=2,
                         name="concat1")
 
-        # Apply dropout and prepare for LSTM input
+        # Apply dropout and prepare input for the LSTM net
         net = tf.layers.dropout(net, rate=0.5)
-        net = tf.reshape(net, [-1, self.timestep * (
-            self.cnn_filter * 10 + self.word_embd_vec)],
+        net = tf.reshape(net, [-1, self.cnn_filter * 10 + self.word_embd_vec],
                          name="reshape2")
-        net = tf.split(net, self.timestep, axis=1, name="split1")
+        net = tf.split(net, self.timestep, axis=0, name="split1")
 
         # BI-LSTM
         # Define weights for the Bi-directional LSTM
@@ -92,8 +90,9 @@ class CNN_BILSTM():
         # Backward direction cell
         lstm_bw_cell = rnn.BasicLSTMCell(self.lstm_hidden, forget_bias=1.0)
 
-        net, _, _ = rnn.static_bidirectional_rnn(lstm_fw_cell,
-                                                 lstm_bw_cell, net,
+        net, _, _ = rnn.static_bidirectional_rnn(cell_fw=lstm_fw_cell,
+                                                 cell_bw=lstm_bw_cell,
+                                                 inputs=net,
                                                  dtype=tf.float32)
 
         # Linear activation, using rnn inner loop on all outputs

@@ -35,7 +35,7 @@ def main():
     train_label, valid_label = pos_tags[:3000], pos_tags[3000:]
 
     config = {
-        "lr": 1e-4,
+        "lr": 1e-3,
         "optimizer": "Adam",
         "timestep": constants.TIMESTEP,
         "word_vector": 100,

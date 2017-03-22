@@ -41,7 +41,7 @@ def train(train_word,
                 print("Iteration {}/{}, Batch Loss {:.4f}".format(
                     b * batch_size, num_batches * batch_size, loss))
 
-                eval(model, valid_chr, valid_word, valid_label)
+        eval(model, valid_chr, valid_word, valid_label)
         print("Finished epoch {}\n".format(epoch + 1))
 
 
