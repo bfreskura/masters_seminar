@@ -38,7 +38,8 @@ class CNN_BILSTM():
                                            self.max_word_size])
 
         # POS tags encoded in one-hot fashion (batch_size, num_classes)
-        self.labels = tf.placeholder(tf.float32, (None, self.n_classes))
+        self.labels = tf.placeholder(tf.float32,
+                                     (None, self.timestep, self.n_classes))
 
         # CONVOLUTION on character level
         # Reshape the input so it fits a 2D convolution layer

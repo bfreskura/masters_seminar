@@ -32,7 +32,7 @@ def _embed_glove(data, glove_file, timestep):
         new_sent = []
         for token, tag in sent:
             try:
-                new_sent.append((token, tag, embed_dict[token]))
+                new_sent.append(embed_dict[token])
             except:
                 print("Word", token, "does not exist in the glove vector")
 
@@ -43,30 +43,28 @@ def _embed_glove(data, glove_file, timestep):
         elif len(new_sent) < timestep:
             for _ in range(timestep - len(new_sent)):
                 new_sent.append(
-                    ("NULL", "NULL", np.zeros(glove_vec_size, dtype=np.float)))
+                    np.zeros(glove_vec_size, dtype=np.float))
             embed_data.append(new_sent)
         else:
             embed_data.append(new_sent)
 
         assert len(new_sent) == timestep, "Mismatch in timestep size"
 
-    return embed_data
+    return np.array(embed_data)
 
 
 def _embed_w2vec(data, export_file):
     raise NotImplementedError
 
 
-def _construct_mappings(chars):
+def _construct_mappings(data):
     """
-    Creates id -> char and char -> id mappings
-    :param chars: List of characters in a corpus
+    Creates item -> id mappings
+    :param data: List of all items in a corpus
     :return:
     """
-    char_set = set(chars)
-    id_chr = {id: chr for id, chr in zip(range(len(char_set)), char_set)}
-    chr_id = {chr: id for id, chr in zip(range(len(char_set)), char_set)}
-    return id_chr, chr_id
+    unique_set = set(data)
+    return {chr: id for id, chr in zip(range(len(unique_set)), unique_set)}
 
 
 def _construct_random_mappings(chars, char_embed_dim=30):
@@ -87,15 +85,15 @@ def _construct_random_mappings(chars, char_embed_dim=30):
     return chr_id
 
 
-def _char_to_onehot(chr, chr_mapping):
+def _item_to_onehot(item, item_mappings):
     """
     Convert character to a one hot representation
-    :param chr: Character
-    :param chr_mapping: Character mapping hash-map
+    :param item: Item
+    :param item_mappings: Item mapping hash-map
     :return:
     """
-    vector = np.zeros(len(chr_mapping), dtype=np.uint8)
-    vector[chr_mapping[chr]] = 1
+    vector = np.zeros(len(item_mappings), dtype=np.uint8)
+    vector[item_mappings[item]] = 1
     return vector
 
 
@@ -122,15 +120,24 @@ def embed_chars(data,
     :return:
     """
     chars = []
+    taggings = []
     for sent in data:
-        for token, _ in sent:
+        for token, tag in sent:
             chars.extend(token)
+            taggings.append(tag)
+
+    # Append the special tag
+    taggings.append(constants.WJS_NONE_TAG)
+
     chr_rvec = _construct_random_mappings(chars)
+    tag_ids = _construct_mappings(taggings)
+
     # Export character mappings
     utils.export_pickle(constants.RESOURCES, "chr_vector_mappings_" + dataset,
                         chr_rvec)
 
     new_sents = []
+    new_tags = []
     for sent_i in range(len(data)):
         sent = data[sent_i]
 
@@ -139,9 +146,11 @@ def embed_chars(data,
             sent = sent[:timestep]
         elif len(sent) < timestep:
             sent.extend(
-                [(constants.PAD_TOKEN, None)] * (timestep - len(sent)))
+                [(constants.PAD_TOKEN, constants.WJS_NONE_TAG)] * (
+                    timestep - len(sent)))
 
         sentence = []
+        tags = []
         for token, tag in sent:
             char_embeddings = np.zeros((char_embed_dim, max_word_size),
                                        dtype=np.float32)
@@ -167,17 +176,27 @@ def embed_chars(data,
                        0] == char_embed_dim, "Character embeddings dimensions do not match"
             assert char_embeddings.shape[
                        1] == max_word_size, "Maximum word size dimensions do not match"
+
             sentence.append(np.array(char_embeddings))
+            tags.append(_item_to_onehot(tag, tag_ids))
 
         np_sent = np.array(sentence)
         assert np_sent.shape[0] == timestep, "Timestep dimensions do not match"
         new_sents.append(np_sent)
 
+        np_tags = np.array(tags)
+        assert np_tags.shape[1] == len(tag_ids)
+        new_tags.append(np_tags)
+
     # Export to pickle file
     utils.export_pickle(constants.WJS_DATA,
-                        "wjs_treebank_char_embedding" + str(
+                        "wjs_treebank_char_embedding_" + str(
                             max_word_size),
                         np.array(new_sents))
+    utils.export_pickle(constants.WJS_DATA,
+                        "wjs_treebank_pos_tags_one_hot_" + str(
+                            max_word_size),
+                        np.array(new_tags))
 
 
 def embed_words(data, embedding="glove", timestep=constants.TIMESTEP):
@@ -190,7 +209,7 @@ def embed_words(data, embedding="glove", timestep=constants.TIMESTEP):
     if embedding.lower() == "glove":
         word_embeddings = _embed_glove(data,
                                        os.path.join(constants.RESOURCES,
-                                                    "glove_100",
+                                                    "glove",
                                                     "glove.6B.100d.txt"),
                                        timestep=timestep)
         utils.export_pickle(constants.WJS_DATA,

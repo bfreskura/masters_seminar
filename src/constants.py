@@ -23,3 +23,7 @@ GLOVE_WIKI = "http://nlp.stanford.edu/data/glove.6B.zip"
 
 # Misc
 PAD_TOKEN = "<PAD>"
+WJS_NONE_TAG = '-NONE-'
+
+
+# Parameters
