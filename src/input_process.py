@@ -157,7 +157,9 @@ def embed_chars(data,
 
             if token != constants.PAD_TOKEN:
                 # Convert char to embedded mappings
-                chr_vecs = np.array([chr_rvec[c] for c in token]).T
+                rand_val = np.sqrt(3 / char_embed_dim)
+                chr_vecs = np.random.uniform(-rand_val, rand_val,
+                                             (char_embed_dim, len(token)))
 
                 # Trim if the max word size is exceeded
                 if chr_vecs.shape[1] > max_word_size:

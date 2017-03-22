@@ -18,6 +18,8 @@ class CNN_BILSTM():
         self.cnn_filter = config["filter_dim"]
         self.lstm_hidden = config["lstm_hidden"]
         self.n_classes = config["n_classes"]
+        self.batch_size = config["batch_size"]
+        self.sess = tf.Session()
 
         # Architecture
         """
@@ -26,45 +28,46 @@ class CNN_BILSTM():
         self.word_embedding_input = tf.placeholder(tf.float32,
                                                    (None, self.timestep,
                                                     self.word_embd_vec))
+        # POS tags encoded in one-hot fashion (batch_size, num_classes)
+        self.labels = tf.placeholder(tf.float32,
+                                     (None, self.timestep, self.n_classes))
 
         """
         Character embeddings input of size (batch_size, max_sentence_length
          (a.k.a. timestep), char_embedding_vector_size, max_word_size)
         """
-        self.char_inputs = tf.placeholder(tf.float32,
-                                          [None,
-                                           self.timestep,
-                                           self.char_features,
-                                           self.max_word_size])
-
-        # POS tags encoded in one-hot fashion (batch_size, num_classes)
-        self.labels = tf.placeholder(tf.float32,
-                                     (None, self.timestep, self.n_classes))
+        char_embed = tf.Variable(
+            tf.random_uniform(
+                [self.batch_size,
+                 self.timestep * self.max_word_size,
+                 self.char_features],
+                minval=-np.sqrt(3 / self.char_features),
+                maxval=np.sqrt(3 / self.char_features)),
+        )
 
         # CONVOLUTION on character level
-        # Reshape the input so it fits a 2D convolution layer
-        net = tf.reshape(self.char_inputs,
-                         shape=[-1, self.max_word_size, self.char_features,
-                                self.timestep])
-        net = tf.layers.conv2d(
-            inputs=net,
+        net = tf.layers.conv1d(
+            inputs=char_embed,
             filters=self.cnn_filter,
-            kernel_size=[3, self.char_features],
-            strides=[1, 1],
+            kernel_size=3,
+            strides=1,
             padding="SAME",
             activation=tf.nn.relu,
             name="conv1")
-        net = tf.layers.max_pooling2d(net,
-                                      pool_size=[2, self.char_features],
-                                      strides=2, name="pool1")
+        net = tf.layers.max_pooling1d(net,
+                                      pool_size=4,
+                                      strides=4,
+                                      name="pool1")
 
-        net = tf.reshape(net, [-1, self.timestep,
-                               self.char_features * self.cnn_filter],
-                         name="cnn_flatten")
+        net = tf.reshape(net, [self.batch_size, self.timestep, -1],
+                         name="reshape1")
 
         # Concat word and char-cnn embeddings
         net = tf.concat([self.word_embedding_input, net], axis=2,
                         name="concat1")
+
+        net = tf.split(net, self.timestep, axis=1)
+        net = [tf.squeeze(n) for n in net]
 
         # BI-LSTM
         # Define weights for the Bi-directional LSTM
@@ -72,37 +75,31 @@ class CNN_BILSTM():
             # Hidden layer weights => 2*n_hidden because of forward +
             # backward cells
             'out': tf.Variable(
-                tf.random_normal([None, 2 * self.lstm_hidden, self.n_classes]))
+                tf.random_normal([2 * self.lstm_hidden, self.n_classes]))
         }
         biases = {
-            'out': tf.Variable(tf.zeros([None, self.n_classes]))
+            'out': tf.Variable(tf.random_normal([self.n_classes]))
         }
 
         # Forward direction cell
         lstm_fw_cell = rnn.BasicLSTMCell(self.lstm_hidden, forget_bias=1.0)
         # Backward direction cell
         lstm_bw_cell = rnn.BasicLSTMCell(self.lstm_hidden, forget_bias=1.0)
-        # Get lstm cell output
+
+        # net = tf.reshape(self.word_embedding_input,
+        #                  [-1, self.timestep * self.word_embd_vec])
+        # net = tf.split(net, self.timestep, axis=1)
+
         net, _, _ = rnn.static_bidirectional_rnn(lstm_fw_cell,
                                                  lstm_bw_cell, net,
-                                                 dtype=tf.float32,
-                                                 initial_state_bw=tf.random_uniform(
-                                                     ([None,
-                                                       self.lstm_hidden]),
-                                                     minval=-np.sqrt(
-                                                         6 / self.lstm_hidden),
-                                                     maxval=np.sqrt(
-                                                         6 / self.lstm_hidden)),
-                                                 initial_state_fw=tf.random_uniform(
-                                                     ([None,
-                                                       self.lstm_hidden]),
-                                                     minval=-np.sqrt(
-                                                         6 / self.lstm_hidden),
-                                                     maxval=np.sqrt(
-                                                         6 / self.lstm_hidden)))
+                                                 dtype=tf.float32)
 
-        # Linear activation, using rnn inner loop last output
-        pred = tf.matmul(net[-1], weights['out']) + biases['out']
+        # Linear activation, using rnn inner loop on all outputs
+        pred = [tf.matmul(n, weights['out']) + biases['out'] for n in net]
+        pred = tf.reshape(pred, [-1, self.timestep, self.n_classes])
+
+        # Softmax probabilites
+        self.softmax = tf.nn.softmax(pred)
 
         # Loss and optimizer
         self.loss = tf.reduce_mean(

@@ -16,25 +16,22 @@ def main():
     # input_process.embed_words(wjs_data)
     # input_process.embed_chars(wjs_data)
 
-    # chr_embd = utils.load_pickle(
-    #     os.path.join(constants.WJS_DATA, "wjs_treebank_char_embedding_20.pkl"))
-    #
-    # treebank = utils.load_pickle(os.path.join(constants.WJS_DATA,
-    #                                           "wjs_treebank_glove_100_t" + str(
-    #                                               constants.TIMESTEP) + ".pkl"))
+
+    treebank = utils.load_pickle(os.path.join(constants.WJS_DATA,
+                                              "wjs_treebank_glove_100_t" + str(
+                                                  constants.TIMESTEP) + ".pkl"))
     pos_tags = utils.load_pickle(os.path.join(constants.WJS_DATA,
                                               "wjs_treebank_pos_tags_one_hot_" + str(
                                                   constants.MAX_WORD_SIZE) + ".pkl"))
-    #
-    # chr_embd, treebank, pos_tags = utils.shuffle_data(chr_embd, treebank,
-    #                                                   pos_tags)
-    #
-    # train_chr, valid_chr = chr_embd[:3000], chr_embd[3000:]
-    # train_word, valid_word = treebank[:3000], treebank[3000:]
-    # train_label, valid_label = pos_tags[:3000], pos_tags[3000:]
+
+    # Shuffle
+    treebank, pos_tags = utils.shuffle_data(treebank, pos_tags)
+
+    train_word, valid_word = treebank[:3000], treebank[3000:]
+    train_label, valid_label = pos_tags[:3000], pos_tags[3000:]
 
     config = {
-        "lr": 1.5e-3,
+        "lr": 1.5e-4,
         "optimizer": "Adam",
         "timestep": constants.TIMESTEP,
         "word_vector": 100,
@@ -42,10 +39,18 @@ def main():
         "char_features": constants.CHAR_EMBEDDINGS_FEATURE,
         "filter_dim": 30,
         "lstm_hidden": 200,
-        "n_classes": pos_tags.shape[3]
+        "n_classes": pos_tags.shape[2],
+        "batch_size": 32,
     }
 
     model = models.CNN_BILSTM(config)
+
+    train.train(train_word=train_word,
+                valid_word=valid_word,
+                train_label=train_label,
+                valid_label=valid_label,
+                model=model,
+                batch_size=config['batch_size'])
 
 
 if __name__ == "__main__":

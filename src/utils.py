@@ -19,17 +19,16 @@ def export_pickle(dir, name, object):
         print("Pickle exported to", os.path.join(dir, name + ".pkl"))
 
 
-def shuffle_data(chr_embds, word_embds, labels):
+def shuffle_data(word_embds, labels):
     """
     Shuffles Char embeddings, word embeddings and labels
-    :param chr_embds: Characetr embeddings
     :param word_embds: Word embeddigns
     :param labels: One hot labels
     :return: Shuffled triple
     """
-    indices = np.arange(len(chr_embds))
+    indices = np.arange(len(word_embds))
     np.random.shuffle(indices)
-    return chr_embds[indices], word_embds[indices], labels[indices]
+    return  word_embds[indices], labels[indices]
 
 
 def load_pickle(path):
