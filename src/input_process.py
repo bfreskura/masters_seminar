@@ -99,13 +99,14 @@ def _char_to_onehot(chr, chr_mapping):
     return vector
 
 
-def embed_chars(data, max_word_size=20, char_embed_dim=30):
+def embed_chars(data, max_word_size=20, char_embed_dim=30, dataset="wjs"):
     """
     Embed dataset on a character level. Each character is represented as a
     random char_embed_dim dimensional vector. Exports embedding to a pickle file.
     Final list item structure is the following:
     (sentence_length, char_embed_dim, max_word_size)
 
+    :param dataset: Dataset type
     :param char_embed_dim: Character embeddings vector dimension. 30 is set
     according to the paper.
     :param max_word_size: Words with length less than this are padded with zeros
@@ -119,6 +120,9 @@ def embed_chars(data, max_word_size=20, char_embed_dim=30):
         for token, _ in sent:
             chars.extend(token)
     chr_rvec = _construct_random_mappings(chars)
+    # Export character mappings
+    utils.export_pickle(constants.RESOURCES, "chr_vector_mappings_" + dataset,
+                        chr_rvec)
 
     new_sents = []
     for sent in data:

@@ -3,7 +3,11 @@ import tensorflow as tf
 from tensorflow.contrib import rnn
 
 
-class BLSTM_CNN():
+class CNN_BILSTM():
+    """
+    Creates a CNN -> BI-LSTM model architecture
+    """
+
     def __init__(self, config):
         self.learning_rate = config["lr"]
         self.optimizer = config["optimizer"]
@@ -11,25 +15,57 @@ class BLSTM_CNN():
         self.word_embd_vec = config["word_vector"]
         self.max_word_size = config["max_word_size"]
         self.char_features = config["char_features"]
-        self.char_vocab_size = config["char_features"]
         self.cnn_filter = config["filter_dim"]
         self.lstm_hidden = config["lstm_hidden"]
         self.n_classes = config["n_classes"]
 
-        self.char_W = tf.get_variable("char_embed",
-                                      [self.char_vocab_size,
-                                       self.char_features])
-
         # Architecture
-        self.word_embedding_input = tf.placeholder(
-            (None, self.timestep, self.word_embd_vec))
+        """
+        Word embeddings input of size (batch_size, timestep, word_embed_dim)
+        """
+        self.word_embedding_input = tf.placeholder(tf.float32,
+                                                   (None, self.timestep,
+                                                    self.word_embd_vec))
 
-        self.char_inputs = tf.placeholder(tf.int32, [None, self.timestep,
-                                                     self.max_word_size])
+        """
+        Character embeddings input of size (batch_size, max_sentence_length
+         (a.k.a. timestep), char_embedding_vector_size, max_word_size)
+        """
+        self.char_inputs = tf.placeholder(tf.float32,
+                                          [None,
+                                           self.timestep,
+                                           self.char_features,
+                                           self.max_word_size])
 
-        self.labels = tf.placeholder((None, self.n_classes))
+        # POS tags encoded in one-hot fashion (batch_size, num_classes)
+        self.labels = tf.placeholder(tf.float32, (None, self.n_classes))
 
+        # CONVOLUTION on character level
+        # Reshape the input so it fits a 2D convolution layer
+        net = tf.reshape(self.char_inputs,
+                         shape=[-1, self.max_word_size, self.char_features,
+                                self.timestep])
+        net = tf.layers.conv2d(
+            inputs=net,
+            filters=self.cnn_filter,
+            kernel_size=[3, self.char_features],
+            strides=[1, 1],
+            padding="SAME",
+            activation=tf.nn.relu,
+            name="conv1")
+        net = tf.layers.max_pooling2d(net,
+                                      pool_size=[2, self.char_features],
+                                      strides=2, name="pool1")
 
+        net = tf.reshape(net, [-1, self.timestep,
+                               self.char_features * self.cnn_filter],
+                         name="cnn_flatten")
+
+        # Concat word and char-cnn embeddings
+        net = tf.concat([self.word_embedding_input, net], axis=2,
+                        name="concat1")
+
+        # BI-LSTM
         # Define weights for the Bi-directional LSTM
         weights = {
             # Hidden layer weights => 2*n_hidden because of forward +
@@ -40,10 +76,7 @@ class BLSTM_CNN():
         biases = {
             'out': tf.Variable(tf.zeros([None, self.n_classes]))
         }
-        # CONVOLUTION
 
-
-        # BI LSTM
         # Forward direction cell
         lstm_fw_cell = rnn.BasicLSTMCell(self.lstm_hidden, forget_bias=1.0)
         # Backward direction cell
@@ -77,4 +110,3 @@ class BLSTM_CNN():
         self.train_op = tf.train.AdamOptimizer(
             learning_rate=self.learning_rate).minimize(self.loss)
         # TODO add CRF layer
-

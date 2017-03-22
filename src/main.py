@@ -10,14 +10,13 @@ import input_process
 
 
 def main():
-    # wjs_data = data_loader.parse_WJS(constants.WJS_DATA_DIR)
+    wjs_data = data_loader.parse_WJS(constants.WJS_DATA_DIR)
     # # input_process.embed_words(wjs_data)
-    # input_process.embed_chars(wjs_data)
+    input_process.embed_chars(wjs_data)
 
-    chr_embd = utils.load_pickle(
-        os.path.join(constants.WJS_DATA, "wjs_treebank_char_embedding20.pkl"))
+    # chr_embd = utils.load_pickle(
+    #     os.path.join(constants.WJS_DATA, "wjs_treebank_char_embedding20.pkl"))
 
-    IPython.embed()
 
     treebank = utils.load_pickle(os.path.join(constants.WJS_DATA,
                                               "wjs_treebank_glove_100_t" + str(
