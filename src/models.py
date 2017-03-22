@@ -99,15 +99,17 @@ class CNN_BILSTM():
         # Linear activation, using rnn inner loop on all outputs
         pred = [tf.layers.dropout(tf.matmul(n, weights['out']) + biases['out'],
                                   rate=0.5) for n in net]
-        pred = tf.reshape(pred, [-1, self.timestep, self.n_classes])
-
         # Softmax probabilites
+
+        # TODO add CRF layer
+
+        pred = tf.reshape(pred, [-1, self.timestep, self.n_classes])
         self.softmax = tf.nn.softmax(pred)
 
-        # Loss and optimizer
+        # Define loss
         self.loss = tf.reduce_mean(
             tf.nn.softmax_cross_entropy_with_logits(logits=pred,
                                                     labels=self.labels))
+
         self.train_op = tf.train.AdamOptimizer(
             learning_rate=self.learning_rate).minimize(self.loss)
-        # TODO add CRF layer

@@ -2,6 +2,8 @@
 Model training and evaluation
 """
 import tensorflow as tf
+import IPython
+import numpy as np
 
 import utils
 
@@ -39,7 +41,17 @@ def train(train_word,
                 print("Iteration {}/{}, Batch Loss {:.4f}".format(
                     b * batch_size, num_batches * batch_size, loss))
 
+                eval(model, valid_chr, valid_word, valid_label)
         print("Finished epoch {}\n".format(epoch + 1))
 
-    def eval():
-        pass
+
+def eval(model, chr, word, label):
+    pred = model.sess.run(
+        [model.softmax],
+        {model.char_embedding_input: chr,
+         model.word_embedding_input: word,
+         model.labels: label})
+    pred = np.argmax(pred[0], axis=2)
+    true = np.argmax(label, axis=2)
+    print("Validation Accuracy",
+          np.sum(pred == true) / (pred.shape[0] * pred.shape[1]))

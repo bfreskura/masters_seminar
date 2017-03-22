@@ -35,7 +35,7 @@ def main():
     train_label, valid_label = pos_tags[:3000], pos_tags[3000:]
 
     config = {
-        "lr": 1.5e-4,
+        "lr": 1e-4,
         "optimizer": "Adam",
         "timestep": constants.TIMESTEP,
         "word_vector": 100,
@@ -55,8 +55,7 @@ def main():
                 valid_chr=valid_chr,
                 train_label=train_label,
                 valid_label=valid_label,
-                model=model,
-                batch_size=config['batch_size'])
+                model=model)
 
 
 if __name__ == "__main__":
