@@ -99,13 +99,19 @@ def _char_to_onehot(chr, chr_mapping):
     return vector
 
 
-def embed_chars(data, max_word_size=20, char_embed_dim=30, dataset="wjs"):
+def embed_chars(data,
+                max_word_size=constants.MAX_WORD_SIZE,
+                timestep=constants.TIMESTEP,
+                char_embed_dim=constants.CHAR_EMBEDDINGS_FEATURE,
+                dataset="wjs"):
     """
     Embed dataset on a character level. Each character is represented as a
     random char_embed_dim dimensional vector. Exports embedding to a pickle file.
     Final list item structure is the following:
     (sentence_length, char_embed_dim, max_word_size)
 
+    :param timestep: Timestep dimension. Represents the maximum supported
+     sentence length.
     :param dataset: Dataset type
     :param char_embed_dim: Character embeddings vector dimension. 30 is set
     according to the paper.
@@ -125,33 +131,47 @@ def embed_chars(data, max_word_size=20, char_embed_dim=30, dataset="wjs"):
                         chr_rvec)
 
     new_sents = []
-    for sent in data:
+    for sent_i in range(len(data)):
+        sent = data[sent_i]
+
+        # Fit the sentence length to the timestep dim if necessary
+        if len(sent) > timestep:
+            sent = sent[:timestep]
+        elif len(sent) < timestep:
+            sent.extend(
+                [(constants.PAD_TOKEN, None)] * (timestep - len(sent)))
+
         sentence = []
         for token, tag in sent:
             char_embeddings = np.zeros((char_embed_dim, max_word_size),
                                        dtype=np.float32)
 
-            # Convert char to embedded mappings
-            chr_vecs = np.array([chr_rvec[c] for c in token]).T
+            if token != constants.PAD_TOKEN:
+                # Convert char to embedded mappings
+                chr_vecs = np.array([chr_rvec[c] for c in token]).T
 
-            # Trim if the max word size is exceeded
-            if chr_vecs.shape[1] > max_word_size:
-                char_embeddings = chr_vecs[:, :max_word_size]
+                # Trim if the max word size is exceeded
+                if chr_vecs.shape[1] > max_word_size:
+                    char_embeddings = chr_vecs[:, :max_word_size]
 
-            # Put the vector in the center if it doesn't fit the frame
-            elif chr_vecs.shape[1] < max_word_size:
-                pad_size = (max_word_size - chr_vecs.shape[1]) // 2
-                for i in range(chr_vecs.shape[1]):
-                    char_embeddings[:, i + pad_size] = chr_vecs[:, i]
+                # Put the vector in the center if it doesn't fit the frame
+                elif chr_vecs.shape[1] < max_word_size:
+                    pad_size = (max_word_size - chr_vecs.shape[1]) // 2
+                    for i in range(chr_vecs.shape[1]):
+                        char_embeddings[:, i + pad_size] = chr_vecs[:, i]
 
-            else:
-                char_embeddings = chr_vecs
+                else:
+                    char_embeddings = chr_vecs
 
-            assert char_embeddings.shape[0] == char_embed_dim
-            assert char_embeddings.shape[1] == max_word_size
+            assert char_embeddings.shape[
+                       0] == char_embed_dim, "Character embeddings dimensions do not match"
+            assert char_embeddings.shape[
+                       1] == max_word_size, "Maximum word size dimensions do not match"
             sentence.append(np.array(char_embeddings))
 
-        new_sents.append(np.array(sentence))
+        np_sent = np.array(sentence)
+        assert np_sent.shape[0] == timestep, "Timestep dimensions do not match"
+        new_sents.append(np_sent)
 
     # Export to pickle file
     utils.export_pickle(constants.WJS_DATA,
