@@ -18,7 +18,6 @@ class CNN_BILSTM():
         self.cnn_filter = config["filter_dim"]
         self.lstm_hidden = config["lstm_hidden"]
         self.n_classes = config["n_classes"]
-        self.batch_size = config["batch_size"]
         self.sess = tf.Session()
 
         # Architecture
@@ -28,6 +27,9 @@ class CNN_BILSTM():
         self.word_embedding_input = tf.placeholder(tf.float32,
                                                    (None, self.timestep,
                                                     self.word_embd_vec))
+        self.char_embedding_input = tf.placeholder(tf.int32,
+                                                   (None,
+                                                    self.timestep * self.max_word_size))
         # POS tags encoded in one-hot fashion (batch_size, num_classes)
         self.labels = tf.placeholder(tf.float32,
                                      (None, self.timestep, self.n_classes))
@@ -38,18 +40,17 @@ class CNN_BILSTM():
         """
         char_embed = tf.Variable(
             tf.random_uniform(
-                [self.max_word_size,
+                [self.max_word_size * self.timestep,
                  self.char_features],
                 minval=-np.sqrt(3 / self.char_features),
                 maxval=np.sqrt(3 / self.char_features)),
         )
-
-        net =  tf.nn.embedding_lookup(char_embed, self.word_embedding_input)
-        print(net)
+        net = tf.nn.embedding_lookup(char_embed, self.char_embedding_input)
+        net = tf.layers.dropout(net, rate=0.5)
 
         # CONVOLUTION on character level
         net = tf.layers.conv1d(
-            inputs=char_embed,
+            inputs=net,
             filters=self.cnn_filter,
             kernel_size=3,
             strides=1,
@@ -57,19 +58,22 @@ class CNN_BILSTM():
             activation=tf.nn.relu,
             name="conv1")
         net = tf.layers.max_pooling1d(net,
-                                      pool_size=4,
-                                      strides=4,
+                                      pool_size=2,
+                                      strides=2,
                                       name="pool1")
-
-        net = tf.reshape(net, [self.batch_size, self.timestep, -1],
+        net = tf.reshape(net, [-1, self.timestep, self.cnn_filter * 10],
                          name="reshape1")
 
         # Concat word and char-cnn embeddings
         net = tf.concat([self.word_embedding_input, net], axis=2,
                         name="concat1")
 
-        net = tf.split(net, self.timestep, axis=1)
-        net = [tf.squeeze(n) for n in net]
+        # Apply dropout and prepare for LSTM input
+        net = tf.layers.dropout(net, rate=0.5)
+        net = tf.reshape(net, [-1, self.timestep * (
+            self.cnn_filter * 10 + self.word_embd_vec)],
+                         name="reshape2")
+        net = tf.split(net, self.timestep, axis=1, name="split1")
 
         # BI-LSTM
         # Define weights for the Bi-directional LSTM
@@ -88,16 +92,13 @@ class CNN_BILSTM():
         # Backward direction cell
         lstm_bw_cell = rnn.BasicLSTMCell(self.lstm_hidden, forget_bias=1.0)
 
-        # net = tf.reshape(self.word_embedding_input,
-        #                  [-1, self.timestep * self.word_embd_vec])
-        # net = tf.split(net, self.timestep, axis=1)
-
         net, _, _ = rnn.static_bidirectional_rnn(lstm_fw_cell,
                                                  lstm_bw_cell, net,
                                                  dtype=tf.float32)
 
         # Linear activation, using rnn inner loop on all outputs
-        pred = [tf.matmul(n, weights['out']) + biases['out'] for n in net]
+        pred = [tf.layers.dropout(tf.matmul(n, weights['out']) + biases['out'],
+                                  rate=0.5) for n in net]
         pred = tf.reshape(pred, [-1, self.timestep, self.n_classes])
 
         # Softmax probabilites

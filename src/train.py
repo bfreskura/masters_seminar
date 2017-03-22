@@ -1,19 +1,20 @@
 """
 Model training and evaluation
 """
-import IPython
-import utils
-
 import tensorflow as tf
+
+import utils
 
 
 def train(train_word,
           valid_word,
+          train_chr,
+          valid_chr,
           train_label,
           valid_label,
           model,
-          batch_size=32,
-          num_epochs=5):
+          batch_size=4,
+          num_epochs=20):
     # Init variables
     model.sess.run(tf.global_variables_initializer())
 
@@ -21,20 +22,24 @@ def train(train_word,
 
     for epoch in range(num_epochs):
         # Shuffle training data in each epoch
-        train_word, train_label = utils.shuffle_data(train_word, train_label)
+        train_chr, train_word, train_label = utils.shuffle_data(train_chr,
+                                                                train_word,
+                                                                train_label)
         for b in range(num_batches):
+            chr = train_chr[b * batch_size:(b + 1) * batch_size]
             word = train_word[b * batch_size:(b + 1) * batch_size]
             label = train_label[b * batch_size:(b + 1) * batch_size]
             loss, _, pred = model.sess.run(
                 [model.loss, model.train_op, model.softmax],
-                {model.word_embedding_input: word,
+                {model.char_embedding_input: chr,
+                 model.word_embedding_input: word,
                  model.labels: label})
 
-            if b % 10 == 0:
-                print("Batch Loss {:.4f}".format(loss))
+            if b % 20 == 0:
+                print("Iteration {}/{}, Batch Loss {:.4f}".format(
+                    b * batch_size, num_batches * batch_size, loss))
 
-        print("Finished epoch {}".format(epoch + 1))
+        print("Finished epoch {}\n".format(epoch + 1))
 
-
-def eval():
-    pass
+    def eval():
+        pass

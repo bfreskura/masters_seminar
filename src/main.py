@@ -23,12 +23,14 @@ def main():
     pos_tags = utils.load_pickle(os.path.join(constants.WJS_DATA,
                                               "wjs_treebank_pos_tags_one_hot_" + str(
                                                   constants.MAX_WORD_SIZE) + ".pkl"))
-
-    chr_embds = utils.load_pickle(os.path.join(constants.WJS_DATA, "wjs_char_id.pkl"))
+    chr_embds = utils.load_pickle(
+        os.path.join(constants.WJS_DATA, "wjs_char_id.pkl"))
 
     # # Shuffle
-    treebank, pos_tags = utils.shuffle_data(treebank, pos_tags)
+    chr_embds, treebank, pos_tags = utils.shuffle_data(chr_embds, treebank,
+                                                       pos_tags)
 
+    train_chr, valid_chr = chr_embds[:3000], chr_embds[3000:]
     train_word, valid_word = treebank[:3000], treebank[3000:]
     train_label, valid_label = pos_tags[:3000], pos_tags[3000:]
 
@@ -49,13 +51,15 @@ def main():
 
     train.train(train_word=train_word,
                 valid_word=valid_word,
+                train_chr=train_chr,
+                valid_chr=valid_chr,
                 train_label=train_label,
                 valid_label=valid_label,
                 model=model,
                 batch_size=config['batch_size'])
 
 
-    if __name__ == "__main__":
+if __name__ == "__main__":
     # For results consistency
-        np.random.seed(1337)
+    np.random.seed(1337)
     main()

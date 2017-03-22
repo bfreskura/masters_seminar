@@ -153,7 +153,7 @@ def create_char_mappings(data,
 
         sentences.append(new_sent)
 
-    sentences = np.array(sentences)
+    sentences = np.array(sentences, dtype=np.int32)
     assert sentences.shape[0] == len(data)
     assert sentences.shape[1] == timestep * max_word_size
 
