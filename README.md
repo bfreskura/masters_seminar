@@ -34,3 +34,9 @@ tagging and 91.21% F1 for NER.
 * Python 3.6
 * pip packages from the `requirements.txt` file
 
+
+## Acknowledgments
+A big thanks to [Martin Tutek](https://www.linkedin.com/in/mtutek) who helped
+with the understanding of the paper.
+
+Also thanks to [TakeLab](http://takelab.fer.hr/) for providing all the resources.
