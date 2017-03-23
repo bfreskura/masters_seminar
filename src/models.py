@@ -19,6 +19,7 @@ class CNN_BILSTM_CRF():
         self.cnn_filter = config["filter_dim"]
         self.lstm_hidden = config["lstm_hidden"]
         self.n_classes = config["n_classes"]
+        self.char_vocab_dim = config["char_vocab_dim"]
         train_examples = config["train_examples"]
         batch_size = config["batch_size"]
 
@@ -45,8 +46,7 @@ class CNN_BILSTM_CRF():
         # Char embedding layer
         char_embed = tf.Variable(
             tf.random_uniform(
-                [self.max_word_size * self.timestep,
-                 self.char_features],
+                [self.char_vocab_dim, self.char_features],
                 minval=-np.sqrt(3 / self.char_features),
                 maxval=np.sqrt(3 / self.char_features)),
         )
@@ -62,12 +62,11 @@ class CNN_BILSTM_CRF():
             padding="SAME",
             activation=tf.nn.relu,
             name="conv1")
-        print(net)
         net = tf.layers.max_pooling1d(net,
                                       pool_size=2,
                                       strides=2,
                                       name="pool1")
-        net = tf.reshape(net, [-1, self.timestep, self.cnn_filter * 10],
+        net = tf.reshape(net, [-1, self.timestep, self.cnn_filter * 6],
                          name="reshape1")
 
         # Concatenate word and char-cnn embeddings
@@ -76,7 +75,7 @@ class CNN_BILSTM_CRF():
 
         # Apply dropout and prepare input for the BI-LSTM net
         net = tf.layers.dropout(net, rate=0.5)
-        net = tf.reshape(net, [-1, self.cnn_filter * 10 + self.word_embd_vec],
+        net = tf.reshape(net, [-1, self.cnn_filter * 6 + self.word_embd_vec],
                          name="reshape2")
         net = tf.split(net, self.timestep, axis=0, name="split1")
 

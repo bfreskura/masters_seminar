@@ -103,7 +103,7 @@ def create_char_mappings(data,
     :param data: Dataset
     :param max_word_size: Maximum word length
     :param timestep: Maximum Sentence length
-    :return: See 7)
+    :return: (7), chr->id hashmap) tuple
     """
 
     # Create char -> id hash map
@@ -152,6 +152,10 @@ def create_char_mappings(data,
         utils.export_pickle(export_dir,
                             "treebank_wjs_char_mappings_" + str(timestep),
                             np.array(sentences))
+
+    # Export mappings
+    utils.export_pickle(export_dir,
+                        "treebank_wjs_chr_id_mappings", chr_rvec)
     return np.array(sentences)
 
 

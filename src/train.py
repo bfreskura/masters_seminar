@@ -5,6 +5,7 @@ import numpy as np
 import tensorflow as tf
 import constants
 import os
+import IPython
 
 import utils
 

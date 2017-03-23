@@ -30,6 +30,8 @@ def main():
     chr_embds = utils.load_pickle(os.path.join(constants.WJS_DATA,
                                                "treebank_wjs_char_mappings_" + str(
                                                    constants.TIMESTEP) + ".pkl"))
+    chr_id_mappings = utils.load_pickle(
+        os.path.join(constants.WJS_DATA, "treebank_wjs_chr_id_mappings.pkl"))
 
     # Shuffle
     chr_embds, treebank, pos_tags = utils.shuffle_data(chr_embds, treebank,
@@ -50,7 +52,8 @@ def main():
         "lstm_hidden": 200,
         "n_classes": pos_tags.shape[2],
         "batch_size": 128,
-        "train_examples": train_chr.shape[0]
+        "train_examples": train_chr.shape[0],
+        "char_vocab_dim": len(chr_id_mappings) + 1
     }
     model = models.CNN_BILSTM_CRF(config)
 
