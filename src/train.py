@@ -58,7 +58,6 @@ def train(train_word,
             if b % 40 == 0:
                 print("Iteration {}/{}, Batch Loss {:.4f}, LR: {:.4f}".format(
                     b * batch_size, num_batches * batch_size, loss, lr))
-                print(model.sess.run(model.global_step))
 
         eval(model, valid_chr, valid_word, valid_label)
         print("Finished epoch {}\n".format(epoch + 1))

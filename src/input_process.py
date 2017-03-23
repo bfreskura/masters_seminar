@@ -7,15 +7,14 @@ import constants
 import utils
 
 
-def _embed_glove(data, glove_file, timestep):
+def _embed_glove(data, glove_file, timestep, glove_vec_size=100):
     """
-    Creates word embedding using the Glove 100 vectors.
+    Creates word embedding using the Glove vectors.
     :param data: List of sentences where each sentence consists of (token, pos_tag)
     pairs
-    :return: List of sentences which contain (token, tag, embedding) triplets
+    :return: List of sentences which contain (timestep, vec_size) arrays
     """
     embed_dict = dict()
-    glove_vec_size = 100
 
     # Load glove hashmap
     print("Loading Glove vectors, may take a while")
@@ -34,6 +33,7 @@ def _embed_glove(data, glove_file, timestep):
             try:
                 new_sent.append(embed_dict[token])
             except:
+                new_sent.append(np.zeros(glove_vec_size))
                 print("Word", token, "does not exist in the glove vector")
 
         # Adjust sentence length so it fits into a LSTM net
@@ -48,9 +48,12 @@ def _embed_glove(data, glove_file, timestep):
         else:
             embed_data.append(new_sent)
 
-        assert len(new_sent) == timestep, "Mismatch in timestep size"
+    embed_data = np.array(embed_data)
+    assert embed_data.shape[0] == len(data)
+    assert embed_data.shape[1] == timestep
+    assert embed_data.shape[2] == glove_vec_size
 
-    return np.array(embed_data)
+    return embed_data
 
 
 def _embed_w2vec(data, export_file):
@@ -76,7 +79,7 @@ def _item_to_onehot(item, item_mappings):
     :return:
     """
     vector = np.zeros(len(item_mappings), dtype=np.uint8)
-    vector[item_mappings[item]] = 1
+    vector[item_mappings[item] - 1] = 1
     return vector
 
 
@@ -146,9 +149,48 @@ def create_char_mappings(data,
 
     # Export to pickle
     if export_dir:
-        utils.export_pickle(export_dir, "treebank_wjs_char_mappings",
+        utils.export_pickle(export_dir,
+                            "treebank_wjs_char_mappings_" + str(timestep),
                             np.array(sentences))
     return np.array(sentences)
+
+
+def encode_labels(data, timestep=constants.TIMESTEP):
+    """
+    TODO
+    :param data:
+    :param timestep:
+    :return:
+    """
+    tags = []
+    for sent in data:
+        for token, tag in sent:
+            tags.append(tag)
+    tags.append(constants.WJS_NONE_TAG)
+    tag_id = _construct_mappings(tags)
+
+    encoded_tags = []
+    for sent in data:
+        new_enc = np.zeros((timestep, len(tag_id)), dtype=np.uint8)
+        encoded = np.array([_item_to_onehot(tag, tag_id) for _, tag in sent],
+                           dtype=np.uint8)
+
+        if len(encoded) > timestep:
+            new_enc = encoded[:timestep]
+        elif len(encoded) < timestep:
+            new_enc[:len(encoded)] = encoded[:]
+        else:
+            new_enc = encoded
+        encoded_tags.append(new_enc)
+
+    encoded_tags = np.array(encoded_tags)
+    assert encoded_tags.shape[0] == len(data)
+    assert encoded_tags.shape[1] == timestep
+    assert encoded_tags.shape[2] == len(tag_id)
+
+    utils.export_pickle(constants.WJS_DATA,
+                        "wjs_pos_one_hot_" + str(timestep), encoded_tags)
+    return encoded_tags
 
 
 def embed_words(data, embedding="glove", timestep=constants.TIMESTEP):

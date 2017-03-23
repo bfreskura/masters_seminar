@@ -6,22 +6,30 @@ import constants
 import models
 import train
 import utils
+import input_process
+import data_loader
+import IPython
+
+
+def split_data(test_size=0.3):
+    pass
 
 
 def main():
     # wjs_data = data_loader.parse_WJS(constants.WJS_DATA_DIR)
     # input_process.embed_words(wjs_data)
-    # input_process.embed_chars(wjs_data)
-    # input_process.create_char_mappings(wjs_data)
+    # input_process.create_char_mappings(wjs_data, export_dir=constants.WJS_DATA)
+    # input_process.encode_labels(wjs_data)
 
     treebank = utils.load_pickle(os.path.join(constants.WJS_DATA,
                                               "wjs_treebank_glove_100_t" + str(
                                                   constants.TIMESTEP) + ".pkl"))
     pos_tags = utils.load_pickle(os.path.join(constants.WJS_DATA,
-                                              "wjs_treebank_pos_tags_one_hot_" + str(
-                                                  constants.MAX_WORD_SIZE) + ".pkl"))
-    chr_embds = utils.load_pickle(
-        os.path.join(constants.WJS_DATA, "wjs_char_id.pkl"))
+                                              "wjs_pos_one_hot_" + str(
+                                                  constants.TIMESTEP) + ".pkl"))
+    chr_embds = utils.load_pickle(os.path.join(constants.WJS_DATA,
+                                               "treebank_wjs_char_mappings_" + str(
+                                                   constants.TIMESTEP) + ".pkl"))
 
     # Shuffle
     chr_embds, treebank, pos_tags = utils.shuffle_data(chr_embds, treebank,
@@ -41,7 +49,8 @@ def main():
         "filter_dim": 30,
         "lstm_hidden": 200,
         "n_classes": pos_tags.shape[2],
-        "batch_size": 32,
+        "batch_size": 128,
+        "train_examples": train_chr.shape[0]
     }
     model = models.CNN_BILSTM_CRF(config)
 

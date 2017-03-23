@@ -19,6 +19,9 @@ class CNN_BILSTM_CRF():
         self.cnn_filter = config["filter_dim"]
         self.lstm_hidden = config["lstm_hidden"]
         self.n_classes = config["n_classes"]
+        train_examples = config["train_examples"]
+        batch_size = config["batch_size"]
+
         self.sess = tf.Session()
         self.global_step = tf.Variable(0, trainable=False)
 
@@ -59,6 +62,7 @@ class CNN_BILSTM_CRF():
             padding="SAME",
             activation=tf.nn.relu,
             name="conv1")
+        print(net)
         net = tf.layers.max_pooling1d(net,
                                       pool_size=2,
                                       strides=2,
@@ -108,14 +112,14 @@ class CNN_BILSTM_CRF():
         # Softmax probabilities
         self.softmax = tf.nn.softmax(pred)
 
-        # Define loss and optimizer
+        # Define the loss and the optimizer
         self.loss = tf.reduce_mean(
             tf.nn.softmax_cross_entropy_with_logits(logits=pred,
                                                     labels=self.labels))
 
         self.lr = tf.train.exponential_decay(learning_rate,
                                              global_step=self.global_step,
-                                             decay_steps=30,
+                                             decay_steps=40 * train_examples // batch_size,
                                              decay_rate=0.95)
         self.train_op = tf.train.AdamOptimizer(
             learning_rate=self.lr).minimize(self.loss,

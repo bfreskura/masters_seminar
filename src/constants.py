@@ -15,16 +15,12 @@ WJS_DATA_DIR = "/home/bartol/nltk_data/corpora/treebank/combined"
 
 # LSTM params
 
-TIMESTEP = 25
-MAX_WORD_SIZE = 20
+TIMESTEP = 30
+MAX_WORD_SIZE = 12
 CHAR_EMBEDDINGS_FEATURE = 30
 
 # Dataset and resources
 GLOVE_WIKI = "http://nlp.stanford.edu/data/glove.6B.zip"
 
 # Misc
-PAD_TOKEN = "<PAD>"
 WJS_NONE_TAG = '-NONE-'
-
-
-# Parameters
