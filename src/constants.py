@@ -8,6 +8,7 @@ NER_DATA = os.path.join(DATA, "ner")
 WJS_DATA = os.path.join(DATA, "wjs_treebank")
 
 RESOURCES = os.path.join(ROOT, "resources")
+TF_WEIGHTS = os.path.join(RESOURCES, "weights")
 
 # Original files
 WJS_DATA_DIR = "/home/bartol/nltk_data/corpora/treebank/combined"

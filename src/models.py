@@ -10,7 +10,7 @@ class CNN_BILSTM_CRF():
     """
 
     def __init__(self, config):
-        self.learning_rate = config["lr"]
+        learning_rate = config["lr"]
         self.optimizer = config["optimizer"]
         self.timestep = config["timestep"]
         self.word_embd_vec = config["word_vector"]
@@ -20,6 +20,7 @@ class CNN_BILSTM_CRF():
         self.lstm_hidden = config["lstm_hidden"]
         self.n_classes = config["n_classes"]
         self.sess = tf.Session()
+        self.global_step = tf.Variable(0, trainable=False)
 
         """
         Word embeddings input of size (batch_size, timestep, word_embed_dim)
@@ -111,6 +112,11 @@ class CNN_BILSTM_CRF():
         self.loss = tf.reduce_mean(
             tf.nn.softmax_cross_entropy_with_logits(logits=pred,
                                                     labels=self.labels))
-        # TODO add decay
+
+        self.lr = tf.train.exponential_decay(learning_rate,
+                                             global_step=self.global_step,
+                                             decay_steps=30,
+                                             decay_rate=0.95)
         self.train_op = tf.train.AdamOptimizer(
-            learning_rate=self.learning_rate).minimize(self.loss)
+            learning_rate=self.lr).minimize(self.loss,
+                                            global_step=self.global_step)
