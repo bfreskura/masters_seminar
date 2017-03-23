@@ -63,7 +63,7 @@ def train(train_word,
         eval(model, valid_chr, valid_word, valid_label)
         print("Finished epoch {}\n".format(epoch + 1))
 
-        if epoch % 30 == 0:
+        if (epoch + 1) % 30 == 0:
             # Save model every n epochs
             saver.save(model.sess,
                        os.path.join(model_save_dir,

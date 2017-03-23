@@ -11,8 +11,14 @@ import data_loader
 import IPython
 
 
-def split_data(test_size=0.3):
-    pass
+def split_data(chr_embds, treebank, pos_tags, test_size=0.3):
+    ts = int((1 - test_size) * chr_embds.shape[0])
+
+    train_chr, valid_chr = chr_embds[:ts], chr_embds[ts:]
+    train_word, valid_word = treebank[:ts], treebank[ts:]
+    train_label, valid_label = pos_tags[:ts], pos_tags[ts:]
+
+    return train_chr, valid_chr, train_word, valid_word, train_label, valid_label
 
 
 def main():
@@ -37,9 +43,9 @@ def main():
     chr_embds, treebank, pos_tags = utils.shuffle_data(chr_embds, treebank,
                                                        pos_tags)
 
-    train_chr, valid_chr = chr_embds[:3000], chr_embds[3000:]
-    train_word, valid_word = treebank[:3000], treebank[3000:]
-    train_label, valid_label = pos_tags[:3000], pos_tags[3000:]
+    # Split
+    train_chr, valid_chr, train_word, valid_word, train_label, valid_label = split_data(
+        chr_embds, treebank, pos_tags)
 
     config = {
         "lr": 1e-2,
@@ -64,6 +70,7 @@ def main():
                 valid_chr=valid_chr,
                 train_label=train_label,
                 valid_label=valid_label,
+                num_epochs=100,
                 model=model)
 
 

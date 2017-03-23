@@ -66,7 +66,7 @@ class CNN_BILSTM_CRF():
                                       pool_size=2,
                                       strides=2,
                                       name="pool1")
-        net = tf.reshape(net, [-1, self.timestep, self.cnn_filter * 6],
+        net = tf.reshape(net, [-1, self.timestep, self.cnn_filter * 10],
                          name="reshape1")
 
         # Concatenate word and char-cnn embeddings
@@ -75,7 +75,7 @@ class CNN_BILSTM_CRF():
 
         # Apply dropout and prepare input for the BI-LSTM net
         net = tf.layers.dropout(net, rate=0.5)
-        net = tf.reshape(net, [-1, self.cnn_filter * 6 + self.word_embd_vec],
+        net = tf.reshape(net, [-1, self.cnn_filter * 10 + self.word_embd_vec],
                          name="reshape2")
         net = tf.split(net, self.timestep, axis=0, name="split1")
 

@@ -43,7 +43,7 @@ def _embed_glove(data, glove_file, timestep, glove_vec_size=100):
         elif len(new_sent) < timestep:
             for _ in range(timestep - len(new_sent)):
                 new_sent.append(
-                    np.zeros(glove_vec_size, dtype=np.float))
+                    np.zeros(glove_vec_size))
             embed_data.append(new_sent)
         else:
             embed_data.append(new_sent)

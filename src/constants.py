@@ -15,8 +15,8 @@ WJS_DATA_DIR = "/home/bartol/nltk_data/corpora/treebank/combined"
 
 # LSTM params
 
-TIMESTEP = 30
-MAX_WORD_SIZE = 12
+TIMESTEP = 25
+MAX_WORD_SIZE = 20
 CHAR_EMBEDDINGS_FEATURE = 30
 
 # Dataset and resources
