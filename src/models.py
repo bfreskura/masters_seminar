@@ -40,7 +40,7 @@ class CNN_BILSTM_CRF():
                                                    (None,
                                                     self.timestep * self.max_word_size))
         # POS tags encoded in one-hot fashion (batch_size, num_classes)
-        self.labels = tf.placeholder(tf.float32,
+        self.labels = tf.placeholder(tf.int32,
                                      (None, self.timestep, self.n_classes))
 
         # Char embedding layer
@@ -85,10 +85,15 @@ class CNN_BILSTM_CRF():
             # Hidden layer weights => 2*n_hidden because of forward +
             # backward cells
             'out': tf.Variable(
-                tf.random_normal([2 * self.lstm_hidden, self.n_classes]))
+                tf.random_uniform([2 * self.lstm_hidden, self.n_classes],
+                                  minval=-np.sqrt(6 / (
+                                      2 * self.lstm_hidden + self.n_classes)),
+                                  maxval=np.sqrt(6 / (
+                                      2 * self.lstm_hidden + self.n_classes)))
+            )
         }
         biases = {
-            'out': tf.Variable(tf.random_normal([self.n_classes]))
+            'out': tf.Variable(tf.zeros([self.n_classes]))
         }
 
         # Forward and backward direction cell
@@ -105,16 +110,22 @@ class CNN_BILSTM_CRF():
                                   rate=0.5) for n in net]
 
         # TODO add CRF layer
+        logits = tf.reshape(pred, [-1, self.timestep, self.n_classes])
 
-        pred = tf.reshape(pred, [-1, self.timestep, self.n_classes])
+        # CRF
+        # logits, transition_params = tf.contrib.crf.crf_log_likelihood(
+        #     pred, self.labels, self.timestep)
+
 
         # Softmax probabilities
-        self.softmax = tf.nn.softmax(pred)
+        self.softmax = tf.nn.softmax(logits)
 
         # Define the loss and the optimizer
         self.loss = tf.reduce_mean(
-            tf.nn.softmax_cross_entropy_with_logits(logits=pred,
+            tf.nn.softmax_cross_entropy_with_logits(logits=logits,
                                                     labels=self.labels))
+
+        # self.loss = tf.reduce_mean(-logits)
 
         self.lr = tf.train.exponential_decay(learning_rate,
                                              global_step=self.global_step,

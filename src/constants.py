@@ -9,6 +9,7 @@ WJS_DATA = os.path.join(DATA, "wjs_treebank")
 
 RESOURCES = os.path.join(ROOT, "resources")
 TF_WEIGHTS = os.path.join(RESOURCES, "weights")
+LOGS = os.path.join(RESOURCES, "logs")
 
 # Original files
 WJS_DATA_DIR = "/home/bartol/nltk_data/corpora/treebank/combined"
@@ -22,5 +23,3 @@ CHAR_EMBEDDINGS_FEATURE = 30
 # Dataset and resources
 GLOVE_WIKI = "http://nlp.stanford.edu/data/glove.6B.zip"
 
-# Misc
-WJS_NONE_TAG = '-NONE-'

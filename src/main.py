@@ -48,7 +48,7 @@ def main():
         chr_embds, treebank, pos_tags)
 
     config = {
-        "lr": 1e-2,
+        "lr": 1e-3,
         "optimizer": "Adam",
         "timestep": constants.TIMESTEP,
         "word_vector": 100,

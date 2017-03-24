@@ -170,7 +170,6 @@ def encode_labels(data, timestep=constants.TIMESTEP):
     for sent in data:
         for token, tag in sent:
             tags.append(tag)
-    tags.append(constants.WJS_NONE_TAG)
     tag_id = _construct_mappings(tags)
 
     encoded_tags = []
