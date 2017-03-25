@@ -86,3 +86,21 @@ def download_data(download_dir="/tmp"):
         wget.download(constants.GLOVE_WIKI, glove_name)
         print("Downloaded to", glove_name, "\n")
     extract_zip(glove_name, glove_dir)
+
+
+def split_data(chr_embds, treebank, pos_tags, test_size=0.3):
+    """
+    Split the dataset to training and development datasets
+    :param chr_embds:
+    :param treebank:
+    :param pos_tags:
+    :param test_size:
+    :return:
+    """
+    ts = int((1 - test_size) * chr_embds.shape[0])
+
+    train_chr, valid_chr = chr_embds[:ts], chr_embds[ts:]
+    train_word, valid_word = treebank[:ts], treebank[ts:]
+    train_label, valid_label = pos_tags[:ts], pos_tags[ts:]
+
+    return train_chr, valid_chr, train_word, valid_word, train_label, valid_label

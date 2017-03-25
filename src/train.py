@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 from sklearn.metrics import accuracy_score, f1_score, recall_score, \
     precision_score
-
+import logging
 import constants
 import utils
 
@@ -61,12 +61,12 @@ def train(train_word,
                  model.labels: label})
 
             if (b + 1) % 5 == 0:
-                print("Iteration {}/{}, Batch Loss {:.4f}, LR: {:.4f}".format(
+                logging.info("Iteration {}/{}, Batch Loss {:.4f}, LR: {:.4f}".format(
                     b * batch_size, num_batches * batch_size, loss, lr))
 
         eval(model, valid_chr, valid_word, valid_label,
              batch_size=batch_size)
-        print("Finished epoch {}\n".format(epoch + 1))
+        logging.info("Finished epoch {}\n".format(epoch + 1))
 
         if (epoch + 1) % 30 == 0:
             # Save model every n epochs
@@ -74,10 +74,10 @@ def train(train_word,
                               os.path.join(model_save_dir,
                                            domain + "_cnn_bilstm_crf.ckpt"),
                               global_step=model.global_step)
-            print("Model saved at", path)
+            logging.info("Model saved at", path)
 
 
-def eval(model, char, word, label, batch_size=256):
+def eval(model, char, word, label, batch_size):
     """
     Evaluates the model using standard evaluation metrics
     :param model: Trained Model
@@ -87,7 +87,8 @@ def eval(model, char, word, label, batch_size=256):
     :param batch_size: Batch size
     :return:
     """
-    print("Evaluating on the validation set...")
+    logging.info("Evaluating on the validation set...")
+    char, word, label = utils.shuffle_data(char, word, label)
     num_batches = char.shape[0] // batch_size
     acc, prec, rec, f1 = 0, 0, 0, 0
     for b in range(num_batches):
@@ -116,10 +117,10 @@ def eval(model, char, word, label, batch_size=256):
         rec += r
         f1 += f
 
-    print("Accuracy {:.3f}%".format(acc / num_batches * 100))
-    print("Macro Precision {:.3f}%".format(prec / num_batches * 100))
-    print("Macro Recall {:.3f}%".format(rec / num_batches * 100))
-    print("Macro F1 {:.3f}%\n".format(f1 / num_batches * 100))
+    logging.info("Accuracy {:.3f}%".format(acc / num_batches * 100))
+    logging.info("Macro Precision {:.3f}%".format(prec / num_batches * 100))
+    logging.info("Macro Recall {:.3f}%".format(rec / num_batches * 100))
+    logging.info("Macro F1 {:.3f}%\n".format(f1 / num_batches * 100))
 
 
 def calc_metric(y_trues, y_preds):

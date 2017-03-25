@@ -1,31 +1,27 @@
 import os
 
 import numpy as np
-
+import logging
 import constants
+import data_loader
+import input_process
 import models
 import train
 import utils
-import input_process
-import data_loader
-import IPython
+import datetime
 
 
-def split_data(chr_embds, treebank, pos_tags, test_size=0.3):
-    ts = int((1 - test_size) * chr_embds.shape[0])
+def main(download_and_process_data=False, process_data=False, test_size=0.3,
+         batch_size=128, learning_rate=1e-2):
+    if download_and_process_data:
+        utils.download_data()
 
-    train_chr, valid_chr = chr_embds[:ts], chr_embds[ts:]
-    train_word, valid_word = treebank[:ts], treebank[ts:]
-    train_label, valid_label = pos_tags[:ts], pos_tags[ts:]
-
-    return train_chr, valid_chr, train_word, valid_word, train_label, valid_label
-
-
-def main():
-    # wjs_data = data_loader.parse_WJS(constants.WJS_DATA_DIR)
-    # input_process.embed_words(wjs_data)
-    # input_process.create_char_mappings(wjs_data, export_dir=constants.WJS_DATA)
-    # input_process.encode_labels(wjs_data)
+    if process_data:
+        wjs_data = data_loader.parse_WJS(constants.WJS_DATA_DIR)
+        input_process.embed_words(wjs_data)
+        input_process.create_char_mappings(wjs_data,
+                                           export_dir=constants.WJS_DATA)
+        input_process.encode_labels(wjs_data)
 
     treebank = utils.load_pickle(os.path.join(constants.WJS_DATA,
                                               "wjs_treebank_glove_100_t" + str(
@@ -44,26 +40,27 @@ def main():
                                                        pos_tags)
 
     # Split
-    train_chr, valid_chr, train_word, valid_word, train_label, valid_label = split_data(
-        chr_embds, treebank, pos_tags)
+    train_chr, valid_chr, train_word, valid_word, train_label, valid_label = utils.split_data(
+        chr_embds, treebank, pos_tags, test_size=test_size)
 
+    # Net config
     config = {
-        "lr": 1e-2,
+        "lr": learning_rate,
         "optimizer": "Adam",
         "timestep": constants.TIMESTEP,
-        "word_vector": 100,
+        "word_vector_dim": 100,
         "max_word_size": constants.MAX_WORD_SIZE,
-        "char_features": constants.CHAR_EMBEDDINGS_FEATURE,
+        "char_embeddings_dim": constants.CHAR_EMBEDDINGS_FEATURE,
         "filter_dim": 30,
         "lstm_hidden": 200,
         "n_classes": pos_tags.shape[2],
-        "batch_size": 64,
+        "batch_size": batch_size,
         "train_examples": train_chr.shape[0],
         "char_vocab_dim": len(chr_id_mappings) + 1
     }
+    logging.info(" ".join(["CONFIG:", str(config)]))
     model = models.CNN_BILSTM_CRF(config)
 
-    print("CONFIG:", config)
     train.train(train_word=train_word,
                 valid_word=valid_word,
                 train_chr=train_chr,
@@ -78,4 +75,10 @@ def main():
 if __name__ == "__main__":
     # For results consistency
     np.random.seed(1337)
+    log_name = str(
+        datetime.datetime.now().strftime("%Y_%m_%d_%H:%M:%S")) + ".log"
+    logging.basicConfig(filename=os.path.join(constants.LOGS, log_name),
+                        filemode='w',
+                        format='%(asctime)s: %(levelname)s: %(message)s',
+                        level=logging.DEBUG, datefmt='%d/%m/%Y %I:%M:%S %p')
     main()

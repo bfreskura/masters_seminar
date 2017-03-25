@@ -36,7 +36,7 @@ tagging and 91.21% F1 for NER.
 
 
 ## Acknowledgments
-A big thanks to [Martin Tutek](https://www.linkedin.com/in/mtutek) who helped
+A Big thanks to [Martin Tutek](https://www.linkedin.com/in/mtutek) who helped
 with the understanding of the paper.
 
 Also thanks to [TakeLab](http://takelab.fer.hr/) for providing all the resources.
