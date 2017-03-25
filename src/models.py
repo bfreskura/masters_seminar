@@ -108,28 +108,23 @@ class CNN_BILSTM_CRF():
         # Linear activation, using rnn inner loop on all outputs
         pred = [tf.layers.dropout(tf.matmul(n, weights['out']) + biases['out'],
                                   rate=0.5) for n in net]
+        self.logits = tf.reshape(pred, [-1, self.timestep, self.n_classes])
 
-        # TODO add CRF layer
-        logits = tf.reshape(pred, [-1, self.timestep, self.n_classes])
+        # CRF Layer
+        sequence_lengths = np.full(batch_size, self.timestep - 1,
+                                   dtype=np.int32)
+        sequence_lengths_t = tf.constant(sequence_lengths)
 
-        # CRF
-        # logits, transition_params = tf.contrib.crf.crf_log_likelihood(
-        #     pred, self.labels, self.timestep)
+        crf_logits, self.trans_params = tf.contrib.crf.crf_log_likelihood(
+            self.logits,
+            tf.cast(tf.argmax(self.labels, axis=2), tf.int32),
+            sequence_lengths_t)
 
-
-        # Softmax probabilities
-        self.softmax = tf.nn.softmax(logits)
-
-        # Define the loss and the optimizer
-        self.loss = tf.reduce_mean(
-            tf.nn.softmax_cross_entropy_with_logits(logits=logits,
-                                                    labels=self.labels))
-
-        # self.loss = tf.reduce_mean(-logits)
-
+        # Loss and learning rate
+        self.loss = tf.reduce_mean(-crf_logits)
         self.lr = tf.train.exponential_decay(learning_rate,
                                              global_step=self.global_step,
-                                             decay_steps=40 * train_examples // batch_size,
+                                             decay_steps=train_examples // batch_size,
                                              decay_rate=0.95)
         self.train_op = tf.train.AdamOptimizer(
             learning_rate=self.lr).minimize(self.loss,

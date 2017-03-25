@@ -48,7 +48,7 @@ def main():
         chr_embds, treebank, pos_tags)
 
     config = {
-        "lr": 1e-3,
+        "lr": 1e-2,
         "optimizer": "Adam",
         "timestep": constants.TIMESTEP,
         "word_vector": 100,
@@ -57,7 +57,7 @@ def main():
         "filter_dim": 30,
         "lstm_hidden": 200,
         "n_classes": pos_tags.shape[2],
-        "batch_size": 128,
+        "batch_size": 64,
         "train_examples": train_chr.shape[0],
         "char_vocab_dim": len(chr_id_mappings) + 1
     }
@@ -71,7 +71,8 @@ def main():
                 train_label=train_label,
                 valid_label=valid_label,
                 num_epochs=100,
-                model=model)
+                model=model,
+                batch_size=config['batch_size'])
 
 
 if __name__ == "__main__":
