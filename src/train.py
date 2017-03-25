@@ -68,13 +68,13 @@ def train(train_word,
              batch_size=batch_size)
         logging.info("Finished epoch {}\n".format(epoch + 1))
 
-        if (epoch + 1) % 30 == 0:
+        if (epoch + 1) % 10 == 0:
             # Save model every n epochs
             path = saver.save(model.sess,
                               os.path.join(model_save_dir,
                                            domain + "_cnn_bilstm_crf.ckpt"),
                               global_step=model.global_step)
-            logging.info("Model saved at", path)
+            logging.info("Model saved at", str(path))
 
 
 def eval(model, char, word, label, batch_size):

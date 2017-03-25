@@ -67,7 +67,7 @@ def main(download_and_process_data=False, process_data=False, test_size=0.3,
                 valid_chr=valid_chr,
                 train_label=train_label,
                 valid_label=valid_label,
-                num_epochs=100,
+                num_epochs=50,
                 model=model,
                 batch_size=config['batch_size'])
 
@@ -75,9 +75,14 @@ def main(download_and_process_data=False, process_data=False, test_size=0.3,
 if __name__ == "__main__":
     # For results consistency
     np.random.seed(1337)
+
+    # Setup logging
+    utils.dir_creator([constants.LOGS])
     log_name = str(
-        datetime.datetime.now().strftime("%Y_%m_%d_%H:%M:%S")) + ".log"
-    logging.basicConfig(filename=os.path.join(constants.LOGS, log_name),
+        datetime.datetime.now().strftime("%d_%m_%Y_%H:%M")) + ".log"
+    log_file = os.path.join(constants.LOGS, log_name)
+    print("Logging to", log_file)
+    logging.basicConfig(filename=log_file,
                         filemode='w',
                         format='%(asctime)s: %(levelname)s: %(message)s',
                         level=logging.DEBUG, datefmt='%d/%m/%Y %I:%M:%S %p')
