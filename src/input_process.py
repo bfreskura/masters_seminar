@@ -1,9 +1,11 @@
 import os
 
 import numpy as np
+import pdb
 
 import constants
 import utils
+import logging
 
 
 def _embed_glove(data, glove_file, timestep, glove_vec_size=100):
@@ -16,24 +18,25 @@ def _embed_glove(data, glove_file, timestep, glove_vec_size=100):
     embed_dict = dict()
 
     # Load glove hashmap
-    print("Loading Glove vectors, may take a while")
+    logging.info("Loading Glove vectors, may take a while")
     with open(glove_file) as f:
         for line in f:
             split = line.split()
             token = split[0]
             vec = np.array([np.float(x) for x in split[1:]])
             embed_dict[token] = vec
-    print("Glove vectors loaded.")
+    logging.info("Glove vectors loaded.")
 
     embed_data = []
     for sent in data:
         new_sent = []
         for token, tag in sent:
             try:
-                new_sent.append(embed_dict[token])
+                new_sent.append(embed_dict[token.lower()])
             except:
                 new_sent.append(np.zeros(glove_vec_size))
-                print("Word", token, "does not exist in the glove vector")
+                logging.warning(
+                    "Word " + token + " does not exist in the glove vector")
 
         # Adjust sentence length so it fits into a LSTM net
         if len(new_sent) > timestep:
