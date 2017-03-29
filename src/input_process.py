@@ -1,6 +1,5 @@
 import os
 
-import IPython
 import numpy as np
 
 import constants
@@ -84,9 +83,10 @@ def _item_to_onehot(item, item_mappings):
 
 
 def create_char_mappings(data,
+                         mappings_export_file,
                          max_word_size=constants.MAX_WORD_SIZE,
                          timestep=constants.TIMESTEP,
-                         export_dir=None):
+                         export_file=None):
     """
     Creates characters mappings in the following manner:
     1) Map each character to its id (using a hash map)
@@ -100,6 +100,8 @@ def create_char_mappings(data,
 
     Exports data to a pickle file
 
+    :param mappings_export_file: Character -> id hash map export file path
+    :param export_file: Character embeddings export file path
     :param data: Dataset
     :param max_word_size: Maximum word length
     :param timestep: Maximum Sentence length
@@ -148,22 +150,20 @@ def create_char_mappings(data,
     assert sentences.shape[1] == timestep * max_word_size
 
     # Export to pickle
-    if export_dir:
-        utils.export_pickle(export_dir,
-                            "treebank_wjs_char_mappings_" + str(timestep),
-                            np.array(sentences))
+    if export_file:
+        utils.export_pickle(export_file, np.array(sentences))
 
     # Export mappings
-    utils.export_pickle(export_dir,
-                        "treebank_wjs_chr_id_mappings", chr_rvec)
+    utils.export_pickle(mappings_export_file, chr_rvec)
     return np.array(sentences)
 
 
-def encode_labels(data, timestep=constants.TIMESTEP):
+def encode_labels(data, export_file=None, timestep=constants.TIMESTEP):
     """
-    TODO
-    :param data:
-    :param timestep:
+    Encodes labels in one-hot fashion.
+    :param export_file: Export file path
+    :param data: Data
+    :param timestep: Timestep size
     :return:
     """
     tags = []
@@ -191,12 +191,13 @@ def encode_labels(data, timestep=constants.TIMESTEP):
     assert encoded_tags.shape[1] == timestep
     assert encoded_tags.shape[2] == len(tag_id)
 
-    utils.export_pickle(constants.WJS_DATA,
-                        "wjs_pos_one_hot_" + str(timestep), encoded_tags)
+    if export_file:
+        utils.export_pickle(export_file, encoded_tags)
     return encoded_tags
 
 
-def embed_words(data, embedding="glove", timestep=constants.TIMESTEP):
+def embed_words(data, export_file=None, embedding="glove",
+                timestep=constants.TIMESTEP):
     """
     Create word embedded dataset and exports it to a pickle file
     :param timestep: Maximum sentence length after embedding
@@ -209,9 +210,8 @@ def embed_words(data, embedding="glove", timestep=constants.TIMESTEP):
                                                     "glove",
                                                     "glove.6B.100d.txt"),
                                        timestep=timestep)
-        utils.export_pickle(constants.WJS_DATA,
-                            "wjs_treebank_glove_100_t" + str(timestep),
-                            word_embeddings)
+        if export_file:
+            utils.export_pickle(export_file, word_embeddings)
     elif embedding.lower() == "word2vec":
         pass
     else:

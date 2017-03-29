@@ -6,7 +6,7 @@ import wget
 import numpy as np
 
 
-def export_pickle(dir, name, object):
+def export_pickle(dir, object):
     """
     Exports the python object to a pickle file
     :param dir: Export dir
@@ -14,9 +14,9 @@ def export_pickle(dir, name, object):
     :param object: Python object
     :return:
     """
-    with open(os.path.join(dir, name + ".pkl"), mode="wb") as f:
+    with open(os.path.join(dir), mode="wb") as f:
         pickle.dump(file=f, obj=object)
-        print("Pickle exported to", os.path.join(dir, name + ".pkl"))
+        print("Pickle exported to", os.path.join(dir))
 
 
 def shuffle_data(chr_embds, word_embds, labels):

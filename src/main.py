@@ -11,37 +11,60 @@ import utils
 import datetime
 
 
-def main(download_and_process_data=False, process_data=False, test_size=0.3,
-         batch_size=128, learning_rate=1e-2):
-    if download_and_process_data:
-        utils.download_data()
+def prepare_ner_data(process_data, test_size):
+    pass
+
+
+def prepare_wjs_data(process_data, test_size):
+    """
+
+    :param process_data:
+    :param test_size:
+    :return:
+    """
+    # Setup paths
+    path_prefix = os.path.join(constants.WJS_DATA,
+                               "wjs_treebank_timest" + str(
+                                   constants.TIMESTEP) + "_")
+    word_embeddings_path = path_prefix + "word_embeddings.pkl"
+    char_id_mappings_path = path_prefix + "char_id_mappings.pkl"
+    char_embeddings_path = path_prefix + "char_embeddings.pkl"
+    labels_path = path_prefix + "onehot_labels.pkl"
 
     if process_data:
         wjs_data = data_loader.parse_WJS(constants.WJS_DATA_DIR)
-        input_process.embed_words(wjs_data)
+        input_process.embed_words(wjs_data, export_file=word_embeddings_path)
         input_process.create_char_mappings(wjs_data,
-                                           export_dir=constants.WJS_DATA)
-        input_process.encode_labels(wjs_data)
+                                           export_file=char_embeddings_path,
+                                           mappings_export_file=char_id_mappings_path)
+        input_process.encode_labels(wjs_data, export_file=labels_path)
 
-    treebank = utils.load_pickle(os.path.join(constants.WJS_DATA,
-                                              "wjs_treebank_glove_100_t" + str(
-                                                  constants.TIMESTEP) + ".pkl"))
-    pos_tags = utils.load_pickle(os.path.join(constants.WJS_DATA,
-                                              "wjs_pos_one_hot_" + str(
-                                                  constants.TIMESTEP) + ".pkl"))
-    chr_embds = utils.load_pickle(os.path.join(constants.WJS_DATA,
-                                               "treebank_wjs_char_mappings_" + str(
-                                                   constants.TIMESTEP) + ".pkl"))
-    chr_id_mappings = utils.load_pickle(
-        os.path.join(constants.WJS_DATA, "treebank_wjs_chr_id_mappings.pkl"))
+    # Load data from disk
+    treebank = utils.load_pickle(word_embeddings_path)
+    pos_tags = utils.load_pickle(labels_path)
+    chr_embds = utils.load_pickle(char_embeddings_path)
+    chr_id_mappings = utils.load_pickle(char_id_mappings_path)
 
     # Shuffle
     chr_embds, treebank, pos_tags = utils.shuffle_data(chr_embds, treebank,
                                                        pos_tags)
 
     # Split
-    train_chr, valid_chr, train_word, valid_word, train_label, valid_label = utils.split_data(
-        chr_embds, treebank, pos_tags, test_size=test_size)
+    train_chr, valid_chr, train_word, valid_word, train_label, \
+    valid_label = utils.split_data(chr_embds, treebank, pos_tags,
+                                   test_size=test_size)
+
+    return chr_id_mappings, train_chr, valid_chr, train_word, valid_word, \
+           train_label, valid_label, chr_id_mappings
+
+
+def main(download_and_process_data=False, process_data=False, test_size=0.3,
+         batch_size=128, learning_rate=1e-2):
+    if download_and_process_data:
+        utils.download_data()
+
+    chr_id_mappings, train_chr, valid_chr, train_word, valid_word, train_label, \
+    valid_label, chr_id_mappings = prepare_wjs_data(process_data, test_size)
 
     # Net config
     config = {
@@ -53,7 +76,7 @@ def main(download_and_process_data=False, process_data=False, test_size=0.3,
         "char_embeddings_dim": constants.CHAR_EMBEDDINGS_FEATURE,
         "filter_dim": 30,
         "lstm_hidden": 200,
-        "n_classes": pos_tags.shape[2],
+        "n_classes": train_label.shape[2],
         "batch_size": batch_size,
         "train_examples": train_chr.shape[0],
         "char_vocab_dim": len(chr_id_mappings) + 1
@@ -74,7 +97,8 @@ def main(download_and_process_data=False, process_data=False, test_size=0.3,
 
 if __name__ == "__main__":
     # For results consistency
-    np.random.seed(1337)
+    seed = 1337
+    np.random.seed(seed)
 
     # Setup logging
     utils.dir_creator([constants.LOGS])
@@ -86,4 +110,5 @@ if __name__ == "__main__":
                         filemode='w',
                         format='%(asctime)s: %(levelname)s: %(message)s',
                         level=logging.DEBUG, datefmt='%d/%m/%Y %I:%M:%S %p')
+    logging.info("Numpy random seed set to " + str(seed))
     main()

@@ -38,6 +38,9 @@ def train(train_word,
     :param model_save_dir:
     :return:
     """
+    logging.info("=============")
+    logging.info("DATASET: " + domain)
+    logging.info("=============")
     # Init variables
     model.sess.run(tf.global_variables_initializer())
     saver = tf.train.Saver()
@@ -74,7 +77,7 @@ def train(train_word,
                               os.path.join(model_save_dir,
                                            domain + "_cnn_bilstm_crf.ckpt"),
                               global_step=model.global_step)
-            logging.info("Model saved at", str(path))
+            logging.info("Model saved at: " + str(path))
 
 
 def eval(model, char, word, label, batch_size):

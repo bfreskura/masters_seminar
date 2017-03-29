@@ -25,3 +25,12 @@ def parse_WJS(data_dir):
     print("Average sentence length: ", avg // len(sentences))
     print("Maximum sentence length: ", max_len)
     return parsed_sents
+
+
+def parse_NER(data_dir):
+    """
+    Parses the NER ConLL 2003 dataset
+    :param data_dir:
+    :return:
+    """
+    pass
