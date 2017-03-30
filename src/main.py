@@ -11,9 +11,9 @@ import train
 import utils
 
 
-def main(download_and_process_data=False,
+def main(download_resources=False,
          process_data=False, test_size=0.3):
-    if download_and_process_data:
+    if download_resources:
         utils.download_data()
 
     # Load Net config
@@ -47,7 +47,8 @@ def main(download_and_process_data=False,
                 valid_label=valid_label,
                 num_epochs=config['train_epochs'],
                 model=model,
-                batch_size=config['batch_size'])
+                batch_size=config['batch_size'],
+                config=config)
 
 
 if __name__ == "__main__":
@@ -65,5 +66,6 @@ if __name__ == "__main__":
                         filemode='w',
                         format='%(asctime)s: %(levelname)s: %(message)s',
                         level=logging.DEBUG, datefmt='%d/%m/%Y %I:%M:%S %p')
+
     logging.info("Numpy random seed set to " + str(seed))
-    main()
+    main(process_data=False)

@@ -19,6 +19,7 @@ def train(train_word,
           train_label,
           valid_label,
           model,
+          config,
           batch_size=4,
           num_epochs=20,
           model_save_dir=constants.TF_WEIGHTS):
@@ -60,8 +61,9 @@ def train(train_word,
                  model.labels: label})
 
             if (b + 1) % 5 == 0:
-                logging.info("Iteration {}/{}, Batch Loss {:.4f}, LR: {:.4f}".format(
-                    b * batch_size, num_batches * batch_size, loss, lr))
+                logging.info(
+                    "Iteration {}/{}, Batch Loss {:.4f}, LR: {:.4f}".format(
+                        b * batch_size, num_batches * batch_size, loss, lr))
 
         eval(model, valid_chr, valid_word, valid_label,
              batch_size=batch_size)
@@ -71,7 +73,8 @@ def train(train_word,
             # Save model every n epochs
             path = saver.save(model.sess,
                               os.path.join(model_save_dir,
-                                           domain + "_cnn_bilstm_crf.ckpt"),
+                                           config[
+                                               'domain'] + "_cnn_bilstm_crf.ckpt"),
                               global_step=model.global_step)
             logging.info("Model saved at: " + str(path))
 
