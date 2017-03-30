@@ -6,6 +6,7 @@ ROOT = os.path.dirname(__file__)
 DATA = os.path.join(ROOT, "data")
 NER_DATA = os.path.join(DATA, "ner")
 WJS_DATA = os.path.join(DATA, "wjs_treebank")
+CONFIGS = os.path.join(ROOT, "configs")
 
 RESOURCES = os.path.join(ROOT, "resources")
 TF_WEIGHTS = os.path.join(RESOURCES, "weights")

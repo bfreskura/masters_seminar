@@ -4,6 +4,7 @@ import pickle
 import constants
 import wget
 import numpy as np
+import configparser
 
 
 def export_pickle(dir, object):
@@ -86,6 +87,33 @@ def download_data(download_dir="/tmp"):
         wget.download(constants.GLOVE_WIKI, glove_name)
         print("Downloaded to", glove_name, "\n")
     extract_zip(glove_name, glove_dir)
+
+
+def read_config(config_file):
+    """
+    Reads the configuration file and creates a dictionary
+    :param config_file: Ini file path
+    :return:
+    """
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    conf_dict = dict()
+
+    conf_dict['lr'] = float(config["MODEL"]['learning rate'])
+    conf_dict['optimizer'] = config["MODEL"]['optimizer']
+    conf_dict['timestep'] = int(config["MODEL"]['timestep'])
+    conf_dict['word_vector_dim'] = int(
+        config["MODEL"]['word embedding dimension'])
+    conf_dict['char_embeddings_dim'] = int(
+        config["MODEL"]['character embeddings dimension'])
+    conf_dict['max_word_size'] = int(config["MODEL"]['max word length'])
+    conf_dict['filter_dim'] = int(config["MODEL"]['cnn filter dimension'])
+    conf_dict['lstm_hidden'] = int(config["MODEL"]['lstm hidden state dim'])
+    conf_dict['batch_size'] = int(config["MODEL"]['batch size'])
+    conf_dict['domain'] = config["GENERAL"]['domain']
+    conf_dict['train_epochs'] = int(config["GENERAL"]['training epochs'])
+
+    return conf_dict
 
 
 def split_data(chr_embds, treebank, pos_tags, test_size=0.3):

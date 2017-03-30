@@ -21,7 +21,6 @@ def train(train_word,
           model,
           batch_size=4,
           num_epochs=20,
-          domain="treebank_wjs",
           model_save_dir=constants.TF_WEIGHTS):
     """
 
@@ -38,9 +37,6 @@ def train(train_word,
     :param model_save_dir:
     :return:
     """
-    logging.info("=============")
-    logging.info("DATASET: " + domain)
-    logging.info("=============")
     # Init variables
     model.sess.run(tf.global_variables_initializer())
     saver = tf.train.Saver()

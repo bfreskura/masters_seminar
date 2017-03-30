@@ -11,35 +11,32 @@ import train
 import utils
 
 
-def main(download_and_process_data=False, process_data=False, test_size=0.3,
-         batch_size=128, learning_rate=1e-2):
+def main(download_and_process_data=False,
+         process_data=False, test_size=0.3):
     if download_and_process_data:
         utils.download_data()
 
-    # chr_id_mappings, train_chr, valid_chr, train_word, valid_word, train_label, \
-    # valid_label, chr_id_mappings = data_loader.prepare_wjs_data(process_data,
-    #                                                             test_size)
+    # Load Net config
+    config = utils.read_config(os.path.join(constants.CONFIGS, "ner_model.ini"))
+    if config['domain'] == "NER":
+        chr_id_mappings, train_chr, valid_chr, train_word, valid_word, train_label, \
+        valid_label, chr_id_mappings = data_loader.prepare_ner_data(
+            process_data,
+            test_size)
+    else:
+        chr_id_mappings, train_chr, valid_chr, train_word, valid_word, train_label, \
+        valid_label, chr_id_mappings = data_loader.prepare_wjs_data(
+            process_data,
+            test_size)
 
-    chr_id_mappings, train_chr, valid_chr, train_word, valid_word, train_label, \
-    valid_label, chr_id_mappings = data_loader.prepare_ner_data(process_data,
-                                                                test_size)
+    # Update config
+    config['n_classes'] = train_label.shape[2]
+    config['char_vocab_dim'] = len(chr_id_mappings) + 1
+    config['train_examples'] = train_chr.shape[0]
 
-    # # Net config
-    config = {
-        "lr": learning_rate,
-        "optimizer": "Adam",
-        "timestep": constants.TIMESTEP,
-        "word_vector_dim": 100,
-        "max_word_size": constants.MAX_WORD_SIZE,
-        "char_embeddings_dim": constants.CHAR_EMBEDDINGS_FEATURE,
-        "filter_dim": 30,
-        "lstm_hidden": 200,
-        "n_classes": train_label.shape[2],
-        "batch_size": batch_size,
-        "train_examples": train_chr.shape[0],
-        "char_vocab_dim": len(chr_id_mappings) + 1
-    }
-    logging.info(" ".join(["CONFIG:", str(config)]))
+    logging.info("CONFIG:")
+    logging.info("\n".join([k + ": " + str(v) for k, v in config.items()]))
+
     model = models.CNN_BILSTM_CRF(config)
 
     train.train(train_word=train_word,
@@ -48,9 +45,8 @@ def main(download_and_process_data=False, process_data=False, test_size=0.3,
                 valid_chr=valid_chr,
                 train_label=train_label,
                 valid_label=valid_label,
-                num_epochs=50,
+                num_epochs=config['train_epochs'],
                 model=model,
-                domain="NER",
                 batch_size=config['batch_size'])
 
 
