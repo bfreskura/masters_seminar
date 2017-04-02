@@ -116,19 +116,28 @@ def read_config(config_file):
     return conf_dict
 
 
-def split_data(chr_embds, treebank, pos_tags, test_size=0.3):
+def split_data(chr_embds, treebank, pos_tags, test_size=0.4):
     """
-    Split the dataset to training and development datasets
+    Split the dataset to training, development and test datasets.
+    Test set is always half the size of the validation set
     :param chr_embds:
     :param treebank:
     :param pos_tags:
-    :param test_size:
+    :param test_size:Validation + test set size
     :return:
     """
+    # Training set
     ts = int((1 - test_size) * chr_embds.shape[0])
+    train_chr, tmp_chr = chr_embds[:ts], chr_embds[ts:]
+    train_word, tmp_word = treebank[:ts], treebank[ts:]
+    train_label, tmp_label = pos_tags[:ts], pos_tags[ts:]
 
-    train_chr, valid_chr = chr_embds[:ts], chr_embds[ts:]
-    train_word, valid_word = treebank[:ts], treebank[ts:]
-    train_label, valid_label = pos_tags[:ts], pos_tags[ts:]
+    # Validation + test set
+    tss = int(0.5 * tmp_chr.shape[0])
+    valid_chr, test_chr = tmp_chr[:tss], tmp_chr[tss:]
+    valid_word, test_word = tmp_word[:tss], tmp_word[tss:]
+    valid_label, test_label = tmp_label[:tss], tmp_label[tss:]
 
-    return train_chr, valid_chr, train_word, valid_word, train_label, valid_label
+    return train_chr, valid_chr, test_chr, \
+           train_word, valid_word, test_word, \
+           train_label, valid_label, test_label

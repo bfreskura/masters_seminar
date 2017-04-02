@@ -77,7 +77,8 @@ def parse_NER(data_dir):
 
     # Join training and development sets
     parsed_train.extend(parsed_devel)
-    return parsed_train, parsed_test
+    parsed_train.extend(parsed_test)
+    return parsed_train
 
 
 def prepare_wjs_data(process_data, test_size):
@@ -116,15 +117,15 @@ def prepare_wjs_data(process_data, test_size):
                                                        pos_tags)
 
     # Split
-    train_chr, valid_chr, train_word, valid_word, train_label, \
-    valid_label = utils.split_data(chr_embds, treebank, pos_tags,
-                                   test_size=test_size)
+    train_chr, valid_chr, test_chr, train_word, valid_word, test_word, train_label, \
+    valid_label, test_label = utils.split_data(chr_embds, treebank, pos_tags,
+                                               test_size=test_size)
 
-    return chr_id_mappings, train_chr, valid_chr, train_word, valid_word, \
-           train_label, valid_label, chr_id_mappings
+    return train_chr, valid_chr, test_chr, train_word, valid_word, \
+           test_word, train_label, valid_label, test_label, chr_id_mappings
 
 
-def prepare_ner_data(process_data, test_size):
+def prepare_ner_data(process_data, test_size, train=True):
     """
     Prepares the NER dataset for training. Pipeline consists of
     embeddings creation and one-hot label encoding.
@@ -141,9 +142,11 @@ def prepare_ner_data(process_data, test_size):
     labels_path = path_prefix + "onehot_labels.pkl"
 
     if process_data:
-        train_raw, test_raw = parse_NER(
+        train_raw = parse_NER(
             os.path.join(constants.NER_DATA, "raw", "train"))
-        input_process.embed_words(train_raw, export_file=word_embeddings_path)
+
+        input_process.embed_words(train_raw,
+                                  export_file=word_embeddings_path)
         input_process.create_char_mappings(train_raw,
                                            export_file=char_embeddings_path,
                                            mappings_export_file=char_id_mappings_path)
@@ -155,9 +158,9 @@ def prepare_ner_data(process_data, test_size):
     chr_embds = utils.load_pickle(char_embeddings_path)
     chr_id_mappings = utils.load_pickle(char_id_mappings_path)
 
-    train_chr, valid_chr, train_word, valid_word, train_label, \
-    valid_label = utils.split_data(chr_embds, ner, pos_tags,
-                                   test_size=test_size)
+    train_chr, valid_chr, test_chr, train_word, valid_word, test_word, train_label, \
+    valid_label, test_label = utils.split_data(chr_embds, ner, pos_tags,
+                                               test_size=test_size)
 
-    return chr_id_mappings, train_chr, valid_chr, train_word, valid_word, \
-           train_label, valid_label, chr_id_mappings
+    return train_chr, valid_chr, test_chr, train_word, valid_word, \
+           test_word, train_label, valid_label, test_label, chr_id_mappings

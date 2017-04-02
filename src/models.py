@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.contrib import rnn
+import logging
 
 
 class CNN_BILSTM_CRF():
@@ -106,8 +107,9 @@ class CNN_BILSTM_CRF():
                                                  dtype=tf.float32)
 
         # Linear activation, using rnn inner loop on all outputs
-        pred = [tf.layers.dropout(tf.matmul(n, weights['out']) + biases['out'],
-                                  rate=0.5) for n in net]
+        pred = [
+            tf.layers.dropout(tf.matmul(n, weights['out']) + biases['out'], 0.5)
+            for n in net]
         self.logits = tf.reshape(pred, [-1, self.timestep, self.n_classes])
 
         # CRF Layer
@@ -129,3 +131,13 @@ class CNN_BILSTM_CRF():
         self.train_op = tf.train.AdamOptimizer(
             learning_rate=self.lr).minimize(self.loss,
                                             global_step=self.global_step)
+
+    def load_model(self, model_path):
+        """
+        Restores the model from the checkpoint file
+        :param model_path:
+        :return:
+        """
+        saver = tf.train.Saver()
+        saver.restore(self.sess, model_path)
+        logging.info("Model restored from " + model_path)
