@@ -11,13 +11,12 @@ import train
 import utils
 
 
-def main(download_resources=False,
+def main(config, download_resources=False,
          process_data=False, test_size=0.3):
     if download_resources:
         utils.download_data()
 
     # Load Net config
-    config = utils.read_config(os.path.join(constants.CONFIGS, "ner_model.ini"))
     if config['domain'] == "NER":
         chr_id_mappings, train_chr, valid_chr, train_word, valid_word, train_label, \
         valid_label, chr_id_mappings = data_loader.prepare_ner_data(
@@ -55,10 +54,11 @@ if __name__ == "__main__":
     # For results consistency
     seed = 1337
     np.random.seed(seed)
+    config = utils.read_config(os.path.join(constants.CONFIGS, "ner_model.ini"))
 
     # Setup logging
-    utils.dir_creator([constants.LOGS])
-    log_name = str(
+    utils.dir_creator([constants.LOGS, constants.TF_WEIGHTS])
+    log_name = config['domain'] + "_" + str(
         datetime.datetime.now().strftime("%d_%m_%Y_%H:%M")) + ".log"
     log_file = os.path.join(constants.LOGS, log_name)
     print("Logging to", log_file)
@@ -68,4 +68,4 @@ if __name__ == "__main__":
                         level=logging.DEBUG, datefmt='%d/%m/%Y %I:%M:%S %p')
 
     logging.info("Numpy random seed set to " + str(seed))
-    main(process_data=False)
+    main(process_data=False, config=config)

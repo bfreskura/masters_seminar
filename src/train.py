@@ -44,7 +44,6 @@ def train(train_word,
 
     num_batches = train_word.shape[0] // batch_size
 
-    # TODO add file logging
     for epoch in range(num_epochs):
         # Shuffle training data in each epoch
         train_chr, train_word, train_label = utils.shuffle_data(train_chr,
