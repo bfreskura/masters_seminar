@@ -1,0 +1,8 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{pagedsections}[2007/05/11 Adding pagebreaks before sections]
+
+\let\oldsection = \section
+\renewcommand{\section}[1]{
+	\pagebreak
+	\oldsection{#1}
+}
