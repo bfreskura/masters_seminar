@@ -3,8 +3,8 @@
 \LoadClass[a4paper,12pt,pdflatex]{article}
 \usepackage[left=3cm,right=2cm,top=3cm,bottom=3cm,nohea dfoot]{geometry}
 \usepackage[utf8]{inputenc}
-\usepackage[croatian]{babel}
 \usepackage[T1]{fontenc}
+%\usepackage[english]{babel}
 \usepackage{helvet}
 \usepackage{graphicx}
 \usepackage{amsmath,amssymb,amsfonts,textcomp}
@@ -78,7 +78,7 @@
   \par}
 
 
-  \vspace{9.5cm}
+  \vspace{8.5cm}
   {\centering\large
   \MjestoDatum
   \par}
