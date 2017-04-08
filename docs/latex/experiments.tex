@@ -7,10 +7,83 @@ the full version requires a special licence. The NLTK data package includes a
 $10\%$ sample of the Treebank. NER data set was used in its full form.
 Although WSJ and CoNLL have  pre-determined splits for the training,
 development and test sets, I have decided to merge them and then do the custom
-split. Data sets were split using the $60 - 20 - 20$ ratios and random shuffling
-was applied before the split.
+split. Data sets were split on a sentence level using the $60 - 20 - 20$ ratios
+and random shuffling was applied before the split. Table \ref{tab:data} shows
+the number of examples in each of splits.
 
-\textbf{WSJ Penn Treebank} TODO
+\begin{tabular}{ r|c|c| }
+\multicolumn{1}{r}{}
+ &  \multicolumn{1}{c}{WSJ Treebank NLTK sample}
+ & \multicolumn{1}{c}{ConLL 2003 NER} \\
+\cline{2-3}
+Train & 2348 & 12446 \\
+\cline{2-3}
+Development & 783 & 4149 \\
+\cline{2-3}
+Test & 783 & 4149 \\
+\cline{2-3}
+\end{tabular}
+\captionof{table}{Number of examples (sentences) in dataset splits}
+\label{tab:data}
 
-\textbf{NER ConLL 2003} TODO
+
+\textbf{WSJ Penn Treebank}
+Data set is a consists of 2499 selected stories from a three year Wall Street
+Journal (WSJ) collection of 98732 stories for syntactic annotation. There are
+45 unique POS tags including the $\text{-NONE-}$ tag for words without known POS tag. 
+
+\textbf{CoNLL 2003 NER}
+The shared task of CoNLL 2003 concerns language-independent named entity
+recognition. Four types of entities existing in the data set are: persons,
+locations, organizations and names of miscellaneous entities that do not belong
+to the previous three groups. My experiments were focused on the English
+version of the data although German data is also available.
+
+\subsection{Results}
+All experiment used the same hyper parameters which are shown in Table
+\ref{tab:hyper} If the hyper parameter is not present in the network
+architecture e.g. Dropout in the Section \ref{no_dropout}, then the parameter
+is simply ignored.
+
+\begin{center}
+\begin{tabular}{ |c|c|c|c| }
+\hline
+\textbf{Layer} & \textbf{Hyper Parameter} & \textbf{POS} & \textbf{NER} \\ \hline
+\multirow{2}{*}{CNN} & window size & 3 & 3 \\
+ & number of filters & 30 & 30 \\ \hline
+\multirow{3}{*}{LSTM} & state size & 200 & 200 \\
+ & initial state & 0.0 & 0.0 \\
+ & peepholes & no & no \\ \hline
+Dropout & dropout rate & 0.5 & 0.5 \\ \hline
+\multirow{2}{*}{} & batch size & 10 & 10\\
+ & initial learning rate & 0.01 & 0.015 \\
+ & decay rate & 0.05 & 0.05 \\
+\hline
+\end{tabular}
+\captionof{table}{Per layer hyper parameters for datasets}
+\label{tab:hyper}
+\end{center}
+
+\label{no_dropout}
+\subsubsection{No Dropout}
+First set of experiments was conducted without dropout layers. Results are
+displayed in the Table \ref{tab:no_dropout}
+
+\begin{center}
+\begin{tabular}{ |c|c|c|c| }
+\hline
+& {\textbf{POS}} & \multicolumn{2}{|c|}{\textbf{NER}}\\ \hline
+\multirow{4}{*}{Development} & Accuracy & 96.73 & 98.80 \\
+ & Precision & 93.77 & 93.73 \\
+ & Recall & 93.91 & 94.02 \\
+ & F1 & 93.52 & 93.56 \\ \hline
+\multirow{4}{*}{Test} & Accuracy & 96.71 & 98.23 \\
+ & Precision & 93.73 & 91.45 \\
+ & Recall & 93.80 & 91.90 \\
+ & F1 & 93.45 & 91.30 \\ \hline
+\end{tabular}
+\captionof{table}{Results without dropout layers}
+\label{tab:no_dropout}
+\end{center}
+
 
