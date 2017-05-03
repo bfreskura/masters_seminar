@@ -9,8 +9,8 @@ of predicting POS for every word in a sentence and the latter one tries to
 predict the pre-defined entity class.
 
 Traditional state-of-the-art models are linear statistical models, including
-Hidden Markov Models (HMM)\cite{hmm} and Conditional Random Fields
-(CRF)\cite{crf}. All of the former models rely mostly on hand-crafted features
+Hidden Markov Models (HMM)\cite{baum1966statistical} and Conditional Random Fields
+(CRF)\cite{lafferty2001conditional}. All of the former models rely mostly on hand-crafted features
 and task-specific resources. Some of the examples include designing word
 spelling features for POS tagging problems and creating orthographic features
 and external resources such as gazetteers in NER. One obvious problem with
@@ -19,32 +19,32 @@ always available and can be hard to obtain.
 
 With the advent of more powerful GPU resources at the beginning of the decade,
 sequence labelling problems have become more oriented towards Deep Neural
-Networks (DNNs) models. Recurrent Neural Networks (RNN)\cite{rnn} and their
-improved variants, Long-Short Term Memory (LSTM)\cite{lstm} and Gated Recurrent
-Units (GRU)\cite{gru}, have outperformed many traditional approaches and
+Networks (DNNs) models. Recurrent Neural Networks (RNN)\cite{goller1996learning} and their
+improved variants, Long-Short Term Memory (LSTM)\cite{hochreiter1997long} and Gated Recurrent
+Units (GRU)\cite{cho2014properties}, have outperformed many traditional approaches and
 continue to show the most promising results in sequence labelling types of
 problems.
 
-End-to-end Sequence Labeling via Bi-directional LSTM-CNNs-CRF\cite{impl} is a
+End-to-end Sequence Labeling via Bi-directional LSTM-CNNs-CRF\cite{ma2016end} is a
 paper where the authors propose a novel approach for sequence labelling tasks.
 They propose a  end-to-end neural network model which requires no task-specific
 resources, feature engineering, or data pre-processing beyond pre-trained word
 embeddings. They state that their approach can be used on a wide range of
 sequence labelling tasks on different languages and domains. Described model
 consists of three main components: Convolutional Neural Network
-(CNN)\cite{cnn} to encode character-level features, bi-directional
-LSTM\cite{bi-lstm}, and a CRF layer at the end which jointly decodes the labels
+(CNN)\cite{lecun1989backpropagation} to encode character-level features, bi-directional
+LSTM, and a CRF layer at the end which jointly decodes the labels
 for the whole sentence. The original paper was evaluated on two widely known
-datasets: Penn Treebank WSJ\cite{wsj} and NER on English data
-from the CoNLL 2003 shared task\cite{ner}. My experiments used slightly
+datasets: Penn Treebank WSJ\cite{marcus1993building} and NER on English data
+from the CoNLL 2003 shared task\cite{tjong2003introduction}. My experiments used slightly
 modified version of the treebank dataset. As the WSJ Treebank is not free for
 download, I decided to use the sample provided with the NLTK Python
-package\cite{nltk}. The sample consists of one section from the original
+package\cite{bird2006nltk}. The sample consists of one section from the original
 treebank which accounts to around 10$\%$of the complete dataset.
 Authors state that their system achieves 97.55$\%$ accuracy for the POS tagging
 and 91.21$\%$ F1 score for NER, both on the test sets. The objective of the seminar
 was to replicate the results from the original paper by first recreating the
-model architecture in the Google Tensorflow library\cite{tens}, followed by repeating
-the experiments using the above described datasets.
+model architecture in the Google Tensorflow library\cite{abadi2016tensorflow},
+followed by repeating the experiments using the above described datasets.
 
 

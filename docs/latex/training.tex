@@ -1,12 +1,12 @@
 \section{Project setup and training}
 For the implementation I have picked the programming language
-Python 3\cite{python} because of its simplicity and support for a wide variety of
+Python 3 because of its simplicity and support for a wide variety of
 machine learning libraries. The architecture was modeled in the framework
 Tensorflow which offers numerous types of layers out of the box. By connecting
 different layers, Tensorflow creates a directed network graph where forward
 and backward pass computations take place. Other libraries include the widely known
-machine learning library scikit-learn\cite{scikit}, NLP related library
-NLTK\cite{nltk}, and few more which serve as a support for the libraries
+machine learning library scikit-learn\cite{pedregosa2011scikit}, NLP related library
+NLTK, and few more which serve as a support for the libraries
 listed before. The computations for the models were run on a single Nvidia GeForce
 GTX 1080 graphics card. The average running time for $50$ epochs was $10
 - 20$ minutes, depending on the dataset size. The original papers state that
@@ -17,10 +17,11 @@ not figure out why have their experiments been running for such a long period.
 \textbf{Word Embeddings}. My experiments were using Stanford's publicly
 available GloVe 100-dimensional
 \href{http://nlp.stanford.edu/projects/glove/}{embeddings}. Vectors were
-trained on 6 billion words from Wikipedia and web text\cite{glvoe100}. This may
+trained on 6 billion words from Wikipedia and web text\cite{pennington2014glove}. This may
 not be the best approach because of the context differences between our
 datasets and Wikipedia texts and could be improved by training word embeddings
-on the domain specific dataset using software like fastText\cite{fastText}.
+on the domain specific dataset using software like
+fastText\cite{bojanowski2016enriching}.
 
 \textbf{Character Embeddings}. The Character embeddings matrix was randomly initialized
 in a uniform interval $\left[-\sqrt{\frac{3}{dim}},
@@ -29,18 +30,19 @@ in a uniform interval $\left[-\sqrt{\frac{3}{dim}},
 \textbf{Weight Matrices and Bias Vectors}. Matrix weights were also randomly
 initialized in a uniform fashion in the interval $\left[-\sqrt{\frac{6}{r+c}},
 \sqrt{\frac{6}{r+c}}\right]$, where $r$ and $c$ are the number of rows and
-columns in the matrix\cite{initialization}. All bias vectors were initialized
+columns in the matrix. All bias vectors were initialized
 to zero except the forget bias $b_f$ which was set to value of $1$. 
 
 \textbf{Early Stopping}. I haven't directly implemented the early stopping
-technique\cite{earlystop} because authors have showed that the best results
+technique\cite{caruana2000overfitting} because authors have showed that the best results
 appear at around $50$ epochs. For further discussion see section
 \ref{experiments}.
 
 \textbf{Fine tunning the character embeddings layer}
 Character embeddings layer is updated the during gradient updates by the
 backpropagation algorithm. This approach has been previously explored in
-sequential and structured prediction problems\cite{finetune}.
+sequential and structured prediction problems\cite{collobert2011natural},
+\cite{peng2015named}.
 
 \textbf{Dropout layers}
 Dropout is a common technique used for mitigating the overfitting problems.
@@ -49,9 +51,9 @@ layers of Bi-LSTM. Every dropout layer has a fixed dropout ratio of $0.5$.
 
 \subsection{Optimization Algorithm}
 Authors have experimented with multiple optimization algorithms and finally
-decided to use the Stochastic Gradient Descent\cite{SGD} algorithm because of
+decided to use the Stochastic Gradient Descent algorithm because of
 the simplicity and because other algorithms have not improved the results by a
-large margin. I opted for the Adam optimization algorithm\cite{adam} because of
+large margin. I opted for the Adam optimization algorithm\cite{kingma2014adam} because of
 its fast convergence speed and stability. Mini-batch size was set to $128$ for
 NER and $32$ for WSJ Treebank. The initial learning rate was set to $0.01$ for
 POS tagging, and $0.015$ for NER. Learning rate is decreased after every epoch

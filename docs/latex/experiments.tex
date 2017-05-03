@@ -75,7 +75,7 @@ epochs of training are displayed in the Table \ref{tab:dropout}
 \begin{center}
 \begin{tabular}{ |c|c|c|c| }
 \hline
-& {\textbf{POS}} & \multicolumn{2}{|c|}{\textbf{NER}}\\ \hline
+&  & {\textbf{POS}} & {\textbf{NER}}\\ \hline
 \multirow{4}{*}{Development} & Accuracy & 96.73 & \textbf{98.80} \\
  & Precision & 93.77 & 93.73 \\
  & Recall & 93.91 & 94.02 \\
@@ -88,6 +88,7 @@ epochs of training are displayed in the Table \ref{tab:dropout}
 \captionof{table}{Results with dropout layers}
 \label{tab:dropout}
 \end{center}
+
 
 \label{peculiar_dropout}
 \subsubsection{No Dropout}
@@ -105,7 +106,7 @@ performs better when there is no regularization applied in form of dropout.
 \begin{center}
 \begin{tabular}{ |c|c|c|c| }
 \hline
-& {\textbf{POS}} & \multicolumn{2}{|c|}{\textbf{NER}}\\ \hline
+& & {\textbf{POS}} & {\textbf{NER}}\\ \hline
 \multirow{4}{*}{Development} & Accuracy & \textbf{97.08} & 98.78 \\
  & Precision & \textbf{94.24} & \textbf{93.69} \\
  & Recall & \textbf{94.28} & \textbf{94.13} \\
@@ -117,6 +118,30 @@ performs better when there is no regularization applied in form of dropout.
 \end{tabular}
 \captionof{table}{Results without dropout layers}
 \label{tab:no_dropout}
+\end{center}
+
+\subsubsection{No CRF layer}
+For the final set of experiments I have removed the CRF layer which left the
+network with CNN and BI-LSTM layers. While the results from the original paper
+show only a slight performance decrease, my performance has dropped
+substantially, especially on the NER task. Results are shown in table
+\ref{tab:no_crf}
+
+\begin{center}
+\begin{tabular}{ |c|c|c|c| }
+\hline
+& & {\textbf{POS}} & {\textbf{NER}}\\ \hline
+\multirow{4}{*}{Development} & Accuracy & 77.63 & 51.89 \\
+ & Precision & 84.80  & 63.25 \\
+ & Recall & 83.89 & 53.90 \\
+ & F1 & 82.42 & 49.09 \\ \hline
+\multirow{4}{*}{Test} & Accuracy & 78.16 & 48.32 \\
+ & Precision & 84.68 & 61.47 \\
+ & Recall & 83.95 & 50.84 \\
+ & F1 & 82.65 & 46.12 \\ \hline
+\end{tabular}
+\captionof{table}{Results without the CRF layer}
+\label{tab:no_crf}
 \end{center}
 
 
@@ -133,7 +158,7 @@ explained in Section \ref{peculiar_dropout}
 Regarding the adequate number of training epochs, my experiments have
 demonstrated that the metrics scores stabilize at around the 10th epoch and
 don't continue to improve from there. The proper way to address the issue would
-be to use the early stopping technique\cite{early_stop}, but I have used
+be to use the early stopping technique, but I have used
 authors value of 50 as my reference point. The reasoning behind this decision
 is that if the results haven't improved for 40 epochs, they won't continue
 improving afterwards which is practically the definition of early stopping.

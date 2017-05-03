@@ -6,7 +6,8 @@ representation, Bi-LSTM and a CRF layer.
 CNN networks are famous for their appliance in the Computer Vision domain but
 they have also demonstrated an ability to extract morphological information
 from character of words and encode it into neural
-representations\cite{cnn_repr}. We first create a hash map of all character
+representations\cite{santos2014learning} and \cite{chiu2015named}.
+We first create a hash map of all character
 that appear in the dataset where the values are arbitrary assigned integer
 values. All character from the sentences are then represented using their 
 mapped integer values but the padding is also applied on the word level as
@@ -23,14 +24,16 @@ and $V$ is the number of unique characters in the dataset.
     \includegraphics[width=0.5\textwidth]{cnn_embed.png}
 \end{figure}
 
-Before the vectors are passed to a CNN layer, the dropout\cite{dropout} layer is
+Before the vectors are passed to a CNN layer, the
+dropout\cite{srivastava2014dropout} layer is
 applied. Dropout is a technique that is used for preventing the model from
-overfitting\cite{overfit}. One dimensional convolution is applied after the dropout which
+overfitting. One dimensional convolution is applied after the dropout which
 yields character feature vectors. Generated vectors are concatenated with the word
-embedding vectors\cite{word_embedding}. Word embeddings are pre-trained vectors
+embedding vectors. Word embeddings are pre-trained vectors
 that model the inter word relatedness. Some of the most frequently used are
-\textit{word2vec}\cite{w2vec}, \textit{Glove} variants\cite{glove} and
-Senna\cite{senna}. Authors have also experimented with randomly sampled word
+\textit{word2vec}\cite{mikolov2013distributed}, \textit{Glove}
+variants\cite{pennington2014glove} and
+Senna\cite{collobert2011natural}. Authors have also experimented with randomly sampled word
 embeddings and the results were poor in comparison with the pre-trained vectors
 so I have only focused on the former.
 
@@ -41,7 +44,8 @@ The main idea behind RNNs lies in retaining the information from "history".
 In the context of NLP, history refers to observing the whole context of the
 sentence and not just one part of it. Despite the promising results in short
 sentences, RNN losses its performance dramatically with the increasing sentence
-length due to the gradient vanishing and exploding problems \cite{gradient}.
+length due to the gradient vanishing\cite{bengio1994learning}
+and exploding problems \cite{pascanu2013difficulty}.
 
 \begin{figure}
   \caption{LSTM cell architecture}
@@ -78,7 +82,7 @@ $b$ terms are the corresponding bias vectors.
 
 \subsubsection{Bi-LSTM}
 Although LSTM can successfully capture the past context, it is sometimes good
-to have an insight at the future sentence context. Bi-LSTMs \cite{bilstm} model
+to have an insight at the future sentence context. Bi-LSTMs model
 this by adding a an extra LSTM layer which has a reversed information flow
 meaning that the information is propagated from the end of the sentence towards
 the beginning. Output of a Bi-LSTM is a concatenated vector of the two opposite
