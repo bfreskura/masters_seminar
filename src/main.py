@@ -95,4 +95,4 @@ if __name__ == "__main__":
                         level=logging.DEBUG, datefmt='%d/%m/%Y %I:%M:%S %p')
 
     logging.info("Numpy random seed set to " + str(seed))
-    main(process_data=True, config=config, model_train=True)
+    main(process_data=False, config=config, model_train=True)

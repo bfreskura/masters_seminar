@@ -103,7 +103,6 @@ def eval(model, char, word, label, batch_size):
             {model.char_embedding_input: chr_b,
              model.word_embedding_input: word_b,
              model.labels: label_b})
-        pdb.set_trace()
         # Update metric
         a, p, r, f = calc_metric(np.argmax(softmax, axis=2),
                                          np.argmax(label_b, axis=2))

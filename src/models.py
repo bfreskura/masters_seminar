@@ -41,7 +41,7 @@ class CNN_BILSTM_CRF():
                                                    (None,
                                                     self.timestep * self.max_word_size))
         # POS tags encoded in one-hot fashion (batch_size, num_classes)
-        self.labels = tf.placeholder(tf.int32,
+        self.labels = tf.placeholder(tf.float32,
                                      (None, self.timestep, self.n_classes))
 
         # Char embedding layer
@@ -107,16 +107,17 @@ class CNN_BILSTM_CRF():
                                                  dtype=tf.float32)
 
         # Linear activation, using rnn inner loop on all outputs
-        pred = [tf.matmul(n, weights['out']) + biases['out'] for n in net]
-        self.logits = tf.reshape(pred, [self.timestep,-1, self.n_classes])
+        self.logits = tf.reshape(
+            [tf.matmul(n, weights['out']) + biases['out'] for n in
+             net], [-1, self.timestep, self.n_classes])
 
         self.softmax = tf.nn.softmax(self.logits)
-
 
         # Loss and learning rate
         self.loss = tf.reduce_mean(
             tf.nn.softmax_cross_entropy_with_logits(labels=self.labels,
                                                     logits=self.logits))
+
         self.lr = tf.train.exponential_decay(learning_rate,
                                              global_step=self.global_step,
                                              decay_steps=train_examples // batch_size,
@@ -124,6 +125,7 @@ class CNN_BILSTM_CRF():
         self.train_op = tf.train.AdamOptimizer(
             learning_rate=self.lr).minimize(self.loss,
                                             global_step=self.global_step)
+
 
     def load_model(self, model_path):
         """
