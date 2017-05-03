@@ -107,23 +107,16 @@ class CNN_BILSTM_CRF():
                                                  dtype=tf.float32)
 
         # Linear activation, using rnn inner loop on all outputs
-        pred = [
-            tf.layers.dropout(tf.matmul(n, weights['out']) + biases['out'], 0.5)
-            for n in net]
-        self.logits = tf.reshape(pred, [-1, self.timestep, self.n_classes])
+        pred = [tf.matmul(n, weights['out']) + biases['out'] for n in net]
+        self.logits = tf.reshape(pred, [self.timestep,-1, self.n_classes])
 
-        # CRF Layer
-        sequence_lengths = np.full(batch_size, self.timestep - 1,
-                                   dtype=np.int32)
-        sequence_lengths_t = tf.constant(sequence_lengths)
+        self.softmax = tf.nn.softmax(self.logits)
 
-        crf_logits, self.trans_params = tf.contrib.crf.crf_log_likelihood(
-            self.logits,
-            tf.cast(tf.argmax(self.labels, axis=2), tf.int32),
-            sequence_lengths_t)
 
         # Loss and learning rate
-        self.loss = tf.reduce_mean(-crf_logits)
+        self.loss = tf.reduce_mean(
+            tf.nn.softmax_cross_entropy_with_logits(labels=self.labels,
+                                                    logits=self.logits))
         self.lr = tf.train.exponential_decay(learning_rate,
                                              global_step=self.global_step,
                                              decay_steps=train_examples // batch_size,

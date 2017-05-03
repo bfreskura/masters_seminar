@@ -1,13 +1,15 @@
 """
 Model training and evaluation
 """
+import logging
 import os
-import IPython
+import pdb
+
 import numpy as np
 import tensorflow as tf
 from sklearn.metrics import accuracy_score, f1_score, recall_score, \
     precision_score
-import logging
+
 import constants
 import utils
 
@@ -96,23 +98,15 @@ def eval(model, char, word, label, batch_size):
         chr_b = char[b * batch_size:(b + 1) * batch_size]
         word_b = word[b * batch_size:(b + 1) * batch_size]
         label_b = label[b * batch_size:(b + 1) * batch_size]
-        loss, unary_scores, trans_params = model.sess.run(
-            [model.loss, model.logits, model.trans_params],
+        loss, softmax = model.sess.run(
+            [model.loss, model.softmax],
             {model.char_embedding_input: chr_b,
              model.word_embedding_input: word_b,
              model.labels: label_b})
-
-        # Get CRF output scores
-        true_batch = []
-        for tf_unary_scores_ in unary_scores:
-            # Compute the highest scoring sequence.
-            viterbi_sequence, _ = tf.contrib.crf.viterbi_decode(
-                tf_unary_scores_, trans_params)
-            true_batch.append(viterbi_sequence)
-
+        pdb.set_trace()
         # Update metric
-        a, p, r, f = calc_metric(np.array(true_batch),
-                                 np.argmax(label_b, axis=2))
+        a, p, r, f = calc_metric(np.argmax(softmax, axis=2),
+                                         np.argmax(label_b, axis=2))
         acc += a
         prec += p
         rec += r

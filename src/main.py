@@ -29,7 +29,7 @@ def main(config, download_resources=False,
         utils.download_data()
 
     # Get data
-    if config['domain'] == "NER":
+    if config['domain'] == "NER_CONLL":
         train_chr, valid_chr, test_chr, train_word, valid_word, test_word, train_label, \
         valid_label, test_label, chr_id_mappings, = data_loader.prepare_ner_data(
             process_data, test_size)
@@ -95,4 +95,4 @@ if __name__ == "__main__":
                         level=logging.DEBUG, datefmt='%d/%m/%Y %I:%M:%S %p')
 
     logging.info("Numpy random seed set to " + str(seed))
-    main(process_data=False, config=config, model_train=True)
+    main(process_data=True, config=config, model_train=True)
