@@ -2,12 +2,12 @@
 
 \subsection{Data Sets}
 Data sets used in the paper were WSJ Treebank for POS tagging and CoNLL 2003
-for the NER task. I have used only a portion of the Treebank because it isn't
+for the NER task. I have only used a portion of the Treebank because
 the full version requires a special licence. The NLTK data package includes a
-$10\%$ sample of the Treebank. NER data set was used in its full form.
-Although WSJ and CoNLL have  pre-determined splits for the training,
-development and test sets, I have decided to merge them and then do the custom
-split. Data sets were split on a sentence level using the $60 - 20 - 20$ ratios
+10\% sample of the Treebank. NER data set was used in its full form.
+Although WSJ and CoNLL have pre-determined splits for the training,
+development, and test sets, I have decided to perform custom splitting.
+Data sets were split on a sentence level using the 60 - 20 - 20 ratio
 and random shuffling was applied before the split. Table \ref{tab:data} shows
 the number of examples in each of splits.
 
@@ -30,22 +30,22 @@ Test & 783 & 4149 \\
 
 
 \textbf{WSJ Penn Treebank}
-Data set is a consists of 2499 selected stories from a three year Wall Street
+Data set consists of 2499 selected stories from a three year Wall Street
 Journal (WSJ) collection of 98732 stories for syntactic annotation. There are
-45 unique POS tags including the $\text{-NONE-}$ tag for words without known POS tag. 
+45 unique POS tags including the $\text{-NONE-}$ tag for the unknown word tags. 
 
 \textbf{CoNLL 2003 NER}
 The shared task of CoNLL 2003 concerns language-independent named entity
 recognition. Four types of entities existing in the data set are: persons,
 locations, organizations and names of miscellaneous entities that do not belong
 to the previous three groups. My experiments were focused on the English
-version of the data although German data is also available.
+version of the dataset although German data is also available.
 
 \subsection{Results}
-All experiment used the same hyper parameters which are shown in Table
+All experiment shared the same hyper parameters which are shown in Table
 \ref{tab:hyper} If the hyper parameter is not present in the network
 architecture e.g. Dropout in the Section \ref{no_dropout}, then the parameter
-is simply ignored. 
+can be ignored.
 
 \begin{center}
 \begin{tabular}{ |c|c|c|c| }
@@ -99,9 +99,9 @@ on the unseen examples but the explanation could be that my data was shuffled
 on a sentence level across the whole corpus whereas authors have used first $n$
 articles/sections for training and the rest for development and testing. It
 could be that the few last articles/sections differ slightly in context from
-the rest, so the network with dropout applied would actually perform better. On
-contrary, my model has seen examples from the last few articles/sections so it
-performs better when there is no regularization applied in form of dropout.
+the rest, so a network with the applied dropout would actually perform better.
+On the contrary, my model has seen examples from the last few articles/sections so it
+performs better when there is no regularization applied in the form of dropout.
 
 \begin{center}
 \begin{tabular}{ |c|c|c|c| }
@@ -122,7 +122,7 @@ performs better when there is no regularization applied in form of dropout.
 
 \subsubsection{No CRF layer}
 For the final set of experiments I have removed the CRF layer which left the
-network with CNN and BI-LSTM layers. While the results from the original paper
+network with CNN and Bi-LSTM layers. While the results from the original paper
 show only a slight performance decrease, my performance has dropped
 substantially, especially on the NER task. Results are shown in table
 \ref{tab:no_crf}
@@ -145,6 +145,7 @@ substantially, especially on the NER task. Results are shown in table
 \end{center}
 
 
+\label{comparison}
 \subsection{Comparison with the original results}
 All of the replicated results are similar to the original ones up to 1 $-$ 2
 percentage points. In POS tagging task the difference is due to using only a subsection of
@@ -158,8 +159,8 @@ explained in Section \ref{peculiar_dropout}
 Regarding the adequate number of training epochs, my experiments have
 demonstrated that the metrics scores stabilize at around the 10th epoch and
 don't continue to improve from there. The proper way to address the issue would
-be to use the early stopping technique, but I have used
-authors value of 50 as my reference point. The reasoning behind this decision
+be to use the early stopping technique, but I have relied on authors value of 50.
+The reasoning behind this decision
 is that if the results haven't improved for 40 epochs, they won't continue
-improving afterwards which is practically the definition of early stopping.
+improving afterwards which is practically the early stopping method.
 

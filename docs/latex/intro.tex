@@ -1,11 +1,11 @@
 \section{Introduction}
-Sequence labelling is broad category of tasks which focus on assigning labels
+Sequence labelling is a broad category of tasks which focus on assigning labels
 to sequential data formats. In the field of natural language processing (NLP),
 sequence data types are usually sentences and the problem boils down to
 labelling different parts of sentences such as whole sentences, words or
-characters.  Part-of-speech (POS) tagging and named entity recognition (NER)
-are two widely research problems in the NLP domain. The former one has the goal
-of predicting POS for every word in a sentence and the latter one tries to 
+characters. Part-of-speech (POS) tagging and named entity recognition (NER)
+are two widely researched problems in the NLP domain. The former has the goal
+of predicting POS tags for every word in a sentence and the latter tries to
 predict the pre-defined entity class.
 
 Traditional state-of-the-art models are linear statistical models, including
@@ -19,15 +19,15 @@ always available and can be hard to obtain.
 
 With the advent of more powerful GPU resources at the beginning of the decade,
 sequence labelling problems have become more oriented towards Deep Neural
-Networks (DNNs) models. Recurrent Neural Networks (RNN)\cite{goller1996learning} and their
+Network (DNN) models. Recurrent Neural Networks (RNN)\cite{goller1996learning} and their
 improved variants, Long-Short Term Memory (LSTM)\cite{hochreiter1997long} and Gated Recurrent
 Units (GRU)\cite{cho2014properties}, have outperformed many traditional approaches and
-continue to show the most promising results in sequence labelling types of
+continue to show the most promising results in the sequence labelling type of
 problems.
 
 End-to-end Sequence Labeling via Bi-directional LSTM-CNNs-CRF\cite{ma2016end} is a
-paper where the authors propose a novel approach for sequence labelling tasks.
-They propose a  end-to-end neural network model which requires no task-specific
+paper where the authors have implemented a novel approach for sequence labelling tasks.
+They propose a end-to-end neural network model which requires no task-specific
 resources, feature engineering, or data pre-processing beyond pre-trained word
 embeddings. They state that their approach can be used on a wide range of
 sequence labelling tasks on different languages and domains. Described model
@@ -36,14 +36,15 @@ consists of three main components: Convolutional Neural Network
 LSTM, and a CRF layer at the end which jointly decodes the labels
 for the whole sentence. The original paper was evaluated on two widely known
 datasets: Penn Treebank WSJ\cite{marcus1993building} and NER on English data
-from the CoNLL 2003 shared task\cite{tjong2003introduction}. My experiments used slightly
+from the CoNLL 2003 shared task\cite{tjong2003introduction}. My experiments
+were ran on a slightly
 modified version of the treebank dataset. As the WSJ Treebank is not free for
 download, I decided to use the sample provided with the NLTK Python
 package\cite{bird2006nltk}. The sample consists of one section from the original
-treebank which accounts to around 10$\%$of the complete dataset.
-Authors state that their system achieves 97.55$\%$ accuracy for the POS tagging
-and 91.21$\%$ F1 score for NER, both on the test sets. The objective of the seminar
-was to replicate the results from the original paper by first recreating the
+treebank which accounts to around 10\% of the complete dataset.
+Authors state that their system achieves 97.55\% accuracy for the POS tagging
+and 91.21\% F1 score for NER, both on the test sets. The objective of the seminar
+was to replicate the results from the original paper by recreating the
 model architecture in the Google Tensorflow library\cite{abadi2016tensorflow},
 followed by repeating the experiments using the above described datasets.
 
