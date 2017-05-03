@@ -11,6 +11,7 @@ split. Data sets were split on a sentence level using the $60 - 20 - 20$ ratios
 and random shuffling was applied before the split. Table \ref{tab:data} shows
 the number of examples in each of splits.
 
+\begin{center}
 \begin{tabular}{ r|c|c| }
 \multicolumn{1}{r}{}
  &  \multicolumn{1}{c}{WSJ Treebank NLTK sample}
@@ -25,6 +26,7 @@ Test & 783 & 4149 \\
 \end{tabular}
 \captionof{table}{Number of examples (sentences) in dataset splits}
 \label{tab:data}
+\end{center}
 
 
 \textbf{WSJ Penn Treebank}
@@ -43,7 +45,7 @@ version of the data although German data is also available.
 All experiment used the same hyper parameters which are shown in Table
 \ref{tab:hyper} If the hyper parameter is not present in the network
 architecture e.g. Dropout in the Section \ref{no_dropout}, then the parameter
-is simply ignored.
+is simply ignored. 
 
 \begin{center}
 \begin{tabular}{ |c|c|c|c| }
@@ -58,6 +60,7 @@ Dropout & dropout rate & 0.5 & 0.5 \\ \hline
 \multirow{2}{*}{} & batch size & 10 & 10\\
  & initial learning rate & 0.01 & 0.015 \\
  & decay rate & 0.05 & 0.05 \\
+ & training epochs & 50 & 50 \\
 \hline
 \end{tabular}
 \captionof{table}{Per layer hyper parameters for datasets}
@@ -65,15 +68,15 @@ Dropout & dropout rate & 0.5 & 0.5 \\ \hline
 \end{center}
 
 \label{no_dropout}
-\subsubsection{No Dropout}
-First set of experiments was conducted without dropout layers. Results are
-displayed in the Table \ref{tab:no_dropout}
+\subsubsection{With Dropout}
+First set of experiments were conducted with dropout layers. Results after 50
+epochs of training are displayed in the Table \ref{tab:dropout}
 
 \begin{center}
 \begin{tabular}{ |c|c|c|c| }
 \hline
 & {\textbf{POS}} & \multicolumn{2}{|c|}{\textbf{NER}}\\ \hline
-\multirow{4}{*}{Development} & Accuracy & 96.73 & 98.80 \\
+\multirow{4}{*}{Development} & Accuracy & 96.73 & \textbf{98.80} \\
  & Precision & 93.77 & 93.73 \\
  & Recall & 93.91 & 94.02 \\
  & F1 & 93.52 & 93.56 \\ \hline
@@ -82,8 +85,56 @@ displayed in the Table \ref{tab:no_dropout}
  & Recall & 93.80 & 91.90 \\
  & F1 & 93.45 & 91.30 \\ \hline
 \end{tabular}
+\captionof{table}{Results with dropout layers}
+\label{tab:dropout}
+\end{center}
+
+\label{peculiar_dropout}
+\subsubsection{No Dropout}
+Table \ref{tab:no_dropout} shows the results when dropout layers were removed.
+In comparison with dropout layers we can see the slight improvement in all
+metrics across both data sets. Dropout technique usually gives better results
+on the unseen examples but the explanation could be that my data was shuffled
+on a sentence level across the whole corpus whereas authors have used first $n$
+articles/sections for training and the rest for development and testing. It
+could be that the few last articles/sections differ slightly in context from
+the rest, so the network with dropout applied would actually perform better. On
+contrary, my model has seen examples from the last few articles/sections so it
+performs better when there is no regularization applied in form of dropout.
+
+\begin{center}
+\begin{tabular}{ |c|c|c|c| }
+\hline
+& {\textbf{POS}} & \multicolumn{2}{|c|}{\textbf{NER}}\\ \hline
+\multirow{4}{*}{Development} & Accuracy & \textbf{97.08} & 98.78 \\
+ & Precision & \textbf{94.24} & \textbf{93.69} \\
+ & Recall & \textbf{94.28} & \textbf{94.13} \\
+ & F1 & \textbf{93.97} & \textbf{93.63} \\ \hline
+\multirow{4}{*}{Test} & Accuracy & \textbf{96.98} & \textbf{98.32} \\
+ & Precision & \textbf{94.14} & \textbf{91.73} \\
+ & Recall & \textbf{94.19} & \textbf{92.22} \\
+ & F1 & \textbf{93.87} & \textbf{91.63} \\ \hline
+\end{tabular}
 \captionof{table}{Results without dropout layers}
 \label{tab:no_dropout}
 \end{center}
 
+
+\subsection{Comparison with the original results}
+All of the replicated results are similar to the original ones up to 1 $-$ 2
+percentage points. In POS tagging task the difference is due to using only a subsection of
+the whole corpus. NER task results vary because of different examples used
+in training, development, and test sets.
+
+Despite the slight differences, it is interesting to see that dropout had a
+negative impact on the network performance in both domains. The phenomenon is 
+explained in Section \ref{peculiar_dropout}
+
+Regarding the adequate number of training epochs, my experiments have
+demonstrated that the metrics scores stabilize at around the 10th epoch and
+don't continue to improve from there. The proper way to address the issue would
+be to use the early stopping technique\cite{early_stop}, but I have used
+authors value of 50 as my reference point. The reasoning behind this decision
+is that if the results haven't improved for 40 epochs, they won't continue
+improving afterwards which is practically the definition of early stopping.
 

@@ -16,7 +16,8 @@ layer of $C_e \times V$ dimensions, where $C_e$ is the character embedding size,
 and $V$ is the number of unique characters in the dataset.
 
 \begin{figure}
-  \caption{Character embeddings layer followed by a 1-D convolutional layer}
+  \caption{Character embeddings layer followed by a 1-D convolutional layer.
+  Max pool layer with stride=2 and size=2 is applied after the convolution.}
   \label{fig:cnn_embed}
   \centering
     \includegraphics[width=0.5\textwidth]{cnn_embed.png}
@@ -84,7 +85,41 @@ the beginning. Output of a Bi-LSTM is a concatenated vector of the two opposite
 LSTM layers.
 
 \subsection{Conditional Random Fields}
-TODO
+Sequence labelling tasks have correlations between labels in neighbourhoods so
+it is a good approach to jointly decode the best chain of labels for a given
+sequence. CRFs enable us to model label sequences jointly instead of coding
+each label independently. Joint probability is modeled according the following
+equation:
+\begin{align*}
+    p(y | x, w) &= \frac{1}{Z(x, w)} \prod_c \phi(y_c | x, w)\\
+    \phi(y_c | x, w) &= \exp(w_c^T \theta(x, y_c))
+\end{align*}
+where $\theta(x, y_c)$ is a feature vector derived from the global inputs $x$
+and the local set of labels $y_c$.
 
+CRF is trained using a maximum conditional likelihood estimation. For a
+training set $\{(x_i, y_i)\}$, the logarithm of the likelihood is given by:
+\begin{align*}
+    L(w) = \sum_i \log p(y | x; w)
+\end{align*}
 
+Training procedure chooses parameters such that the log-likelihood is
+maximized.
+
+Decoding is defined as a search for the label sequence $y^*$ with the highest
+conditional probability:
+\begin{align*}
+    y^* &= \arg\max\limits_{y \in \gamma(x)} p(y | x; w)
+\end{align*}
+where $\gamma(x)$ denotes the set of possible label sequences for $x$.
+The main network architecture can be seen in Figure \ref{fig:pipeline}.
+
+\begin{figure}
+  \caption{The main network architecture. Dashed layers indicate dropout layers
+  applied both on the input and output vectors of Bi-LSTM. Word and character
+  embeddings are concatenated before inputed in the Bi-LSTM}
+  \label{fig:pipeline}
+  \centering
+    \includegraphics[width=0.6\textwidth]{pipeline.png}
+\end{figure}
 
