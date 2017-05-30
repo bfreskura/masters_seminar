@@ -1,7 +1,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{ferseminar}[2011/04/14 Predlozak za seminar na FER-u]
 \LoadClass[a4paper,12pt,pdflatex]{article}
-\usepackage[left=3cm,right=2cm,top=3cm,bottom=3cm,nohea dfoot]{geometry}
+\usepackage[left=3cm,right=2cm,top=3cm,bottom=2cm,nohea dfoot]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 %\usepackage[english]{babel}
