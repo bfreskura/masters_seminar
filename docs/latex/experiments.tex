@@ -6,13 +6,15 @@ for the NER task. I have only used a portion of the Treebank because
 the full version requires a special licence. The NLTK data package includes a
 10\% sample of the Treebank. NER data set was used in its full form.
 Although WSJ and CoNLL have pre-determined splits for the training,
-development, and test sets, I have decided to perform custom splitting.
+development, and test sets, I have decided to perform custom splitting due to
+the missing part of the WSJ dataset making the results representitive across
+all datasets.
 Data sets were split on a sentence level using the 60 - 20 - 20 ratio
-and random shuffling was applied before the split. Table \ref{tab:data} shows
+and random shuffling was applied before the split. Table~\ref{tab:data} shows
 the number of examples in each of splits.
 
 \begin{center}
-\begin{tabular}{ r|c|c| }
+\begin{tabular}{r|c|c|}
 \multicolumn{1}{r}{}
  &  \multicolumn{1}{c}{WSJ Treebank NLTK sample}
  & \multicolumn{1}{c}{ConLL 2003 NER} \\
@@ -42,13 +44,13 @@ to the previous three groups. My experiments were focused on the English
 version of the dataset although German data is also available.
 
 \subsection{Results}
-All experiment shared the same hyper parameters which are shown in Table
-\ref{tab:hyper} If the hyper parameter is not present in the network
-architecture e.g. Dropout in the Section \ref{no_dropout}, then the parameter
+All experiment shared the same hyper parameters which are shown in Table~\ref{tab:hyper}
+If the hyper parameter is not present in the network
+architecture e.g. Dropout in the Section~\ref{no_dropout}, then the parameter
 can be ignored.
 
 \begin{center}
-\begin{tabular}{ |c|c|c|c| }
+\begin{tabular}{|c|c|c|c|}
 \hline
 \textbf{Layer} & \textbf{Hyper Parameter} & \textbf{POS} & \textbf{NER} \\ \hline
 \multirow{2}{*}{CNN} & window size & 3 & 3 \\
@@ -70,7 +72,7 @@ Dropout & dropout rate & 0.5 & 0.5 \\ \hline
 \label{no_dropout}
 \subsubsection{With Dropout}
 First set of experiments were conducted with dropout layers. Results after 50
-epochs of training are displayed in the Table \ref{tab:dropout}
+epochs of training are displayed in the Table~\ref{tab:dropout}
 
 \begin{center}
 \begin{tabular}{ |c|c|c|c| }
@@ -92,7 +94,7 @@ epochs of training are displayed in the Table \ref{tab:dropout}
 
 \label{peculiar_dropout}
 \subsubsection{No Dropout}
-Table \ref{tab:no_dropout} shows the results when dropout layers were removed.
+Table~\ref{tab:no_dropout} shows the results when dropout layers were removed.
 In comparison with dropout layers we can see the slight improvement in all
 metrics across both data sets. Dropout technique usually gives better results
 on the unseen examples but the explanation could be that my data was shuffled
@@ -124,8 +126,7 @@ performs better when there is no regularization applied in the form of dropout.
 For the final set of experiments I have removed the CRF layer which left the
 network with CNN and Bi-LSTM layers. While the results from the original paper
 show only a slight performance decrease, my performance has dropped
-substantially, especially on the NER task. Results are shown in table
-\ref{tab:no_crf}
+substantially, especially on the NER task. Results are shown in table~\ref{tab:no_crf}
 
 \begin{center}
 \begin{tabular}{ |c|c|c|c| }
@@ -154,7 +155,7 @@ in training, development, and test sets.
 
 Despite the slight differences, it is interesting to see that dropout had a
 negative impact on the network performance in both domains. The phenomenon is 
-explained in Section \ref{peculiar_dropout}
+explained in Section~\ref{peculiar_dropout}
 
 Regarding the adequate number of training epochs, my experiments have
 demonstrated that the metrics scores stabilize at around the 10th epoch and

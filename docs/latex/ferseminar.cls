@@ -40,7 +40,7 @@
 % ovo su definicije varijabli koje treba popuniti
 \newcommand{\student}[1]{\def \Student {#1}}
 \newcommand{\voditelj}[1]{\def \Voditelj {#1}}
-\newcommand{\mjestodatum}[3]{\def \MjestoDatum {#1, #2, #3.}}
+\newcommand{\mjestodatum}[2]{\def \MjestoDatum {#1, #2.}}
 \newcommand{\naslov}[1]{\def \Naslov {#1}}
 
 % ovo je naredba za stvaranje prve stranice i stranice sa sadrzajem
@@ -49,7 +49,7 @@
 
   \vspace{1cm}
   {\centering\mdseries\large
-  Zagreb University
+  University of Zagreb 
   \par}
 
   \vspace{0.5cm}

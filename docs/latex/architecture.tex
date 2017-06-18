@@ -6,34 +6,35 @@ representation, Bi-LSTM and a CRF layer.
 CNN networks are famous for their appliance in the Computer Vision domain but
 have also demonstrated an ability to extract morphological information
 from word characters, encoding them into neural
-representations\cite{santos2014learning}, \cite{chiu2015named}.
+representations \cite{santos2014learning}, \cite{chiu2015named}.
 We first create a hash map of all characters
 that appear in the dataset where  values are arbitrarily assigned integer
 values. All sentence characters are then represented using their
 mapped integer values but the padding is also applied on the word level as
-shown in Figure \ref{fig:cnn_embed}.
+shown in Figure~\ref{fig:cnn_embed}.
 Encoded sentence represents an input which is fed into a trainable character embedding
 layer of $C_e \times V$ dimensions, where $C_e$ is the character embedding size,
 and $V$ is the number of unique characters in the dataset.
 
 \begin{figure}
   \caption{Character embeddings layer followed by a 1-D convolutional layer.
-  Max pool layer with stride=2 and size=2 is applied after the convolution.}
+  Max pool layer with stride=2 and size=2 is applied after the convolution
+  \cite{ma2016end}.}
   \label{fig:cnn_embed}
   \centering
     \includegraphics[width=0.5\textwidth]{cnn_embed.png}
 \end{figure}
 
 Before the vectors are passed to a CNN layer, a
-dropout\cite{srivastava2014dropout} layer is
+dropout \cite{srivastava2014dropout} layer is
 applied. Dropout is a technique used for preventing a model from
 overfitting. One dimensional convolution is applied after the dropout which
 yields character feature vectors. Generated vectors are concatenated with the word
 embedding vectors. Word embeddings are pre-trained vectors
 that model the inter word relatedness. Some of the most frequently used are
-\textit{word2vec}\cite{mikolov2013distributed}, \textit{Glove}
-variants\cite{pennington2014glove} and
-\textit{Senna}\cite{collobert2011natural}. Authors have also experimented with randomly sampled word
+\textit{word2vec} \cite{mikolov2013distributed}, \textit{Glove}
+variants \cite{pennington2014glove} and
+\textit{Senna} \cite{collobert2011natural}. Authors have also experimented with randomly sampled word
 embeddings and the results were poor in comparison with the pre-trained vectors
 so I have only focused on the former.
 
@@ -44,11 +45,11 @@ The main idea behind RNNs lies in retaining information from "history".
 In the context of NLP, history refers to observing the context of the
 sentence up to the currently processed word. Despite the promising results in short
 sentences, RNN losses its performance dramatically with the increasing sentence
-length due to the gradient vanishing\cite{bengio1994learning}
+length due to the gradient vanishing \cite{bengio1994learning}
 and exploding problems \cite{pascanu2013difficulty}.
 
 \begin{figure}
-  \caption{LSTM cell architecture}
+  \caption{LSTM cell architecture \cite{colahblog2015}}
   \label{fig:lstm}
   \centering
     \includegraphics[width=0.6\textwidth]{lstm.png}
@@ -56,8 +57,8 @@ and exploding problems \cite{pascanu2013difficulty}.
 
 LSTMs were designed with the purpose of correcting the RNNs shortcomings. The LSTM
 cell unit is composed of four gates which control the proportion of
-information to forget and to pass on to the next time step. In Figure
-\ref{fig:lstm} we can observe the LSTM cell structure. The first fork from the left
+information to forget and to pass on to the next time step. In Figure~\ref{fig:lstm}
+we can observe the LSTM cell structure. The first fork from the left
 is a forget gate which regulates the old information retention. Next two forks 
 describe how new and the accumulated information from the past are joined
 together. The final fork can be seen as a mix of the filtered input with the
@@ -65,12 +66,12 @@ updated cell state which will be the final cell output. Equation that model the
 LSTM cell at the time step $t$ are the following:
 
 \begin{align*}
-        i_t &= \sigma\left(W_ih_{t-1} + U_{i}x_t + b_i\right)\\
-        f_t &= \sigma\left(W_fh_{t-1} + U_{f}x_t + b_f\right)\\
-        \hat{c_t} &= tanh\left(W_ch_{t-1} + U_{c}x_t + b_c\right)\\
-        c_t &=  f_t \odot c_{t-1} + i_t \odot \hat{c_t}\\
-        o_t &= \sigma\left(W_oh_{t-1} + U_{o}x_t + b_o\right)\\
-        h_t &= o_t \odot tanh(c_t)
+        \bm{i_t} &= \sigma\left(W_ih_{t-1} + U_{i}x_t + b_i\right)\\
+        \bm{f_t} &= \sigma\left(W_fh_{t-1} + U_{f}x_t + b_f\right)\\
+        \bm{\hat{c_t}} &= tanh\left(W_ch_{t-1} + U_{c}x_t + b_c\right)\\
+        \bm{c_t} &=  f_t \odot c_{t-1} + i_t \odot \hat{c_t}\\
+        \bm{o_t} &= \sigma\left(W_oh_{t-1} + U_{o}x_t + b_o\right)\\
+        \bm{h_t} &= o_t \odot tanh(c_t)
 \end{align*}
 
 $\sigma$ is a sigmoid function and $\odot$ represents an element-wise
@@ -82,7 +83,7 @@ $b$ terms are the corresponding bias vectors.
 
 \subsubsection{Bi-LSTM}
 Although LSTM can successfully capture the past context, it is sometimes good
-to have an insight at the future sentence context. Bi-LSTMs model
+to have an insight at the future sentence context. Bi-LSTMs model accomplishes
 this by adding an extra LSTM layer which has a reversed information flow
 meaning that the information is propagated from the end of the sentence towards
 the beginning. Output of a Bi-LSTM is a concatenated vector of the two opposite
@@ -95,16 +96,17 @@ sequence. CRFs enable us to model label sequences jointly instead of coding
 each label independently. Joint probability is modeled according to the following
 equation:
 \begin{align*}
-    p(y | x, w) &= \frac{1}{Z(x, w)} \prod_c \phi(y_c | x, w)\\
-    \phi(y_c | x, w) &= \exp(w_c^T \theta(x, y_c))
+    \bm{p(y | x, w)} &= \frac{1}{Z(x, w)} \prod_c \phi(y_c | x, w)\\
+    \bm{\phi(y_c | x, w)} &= \exp(w_c^T \theta(x, y_c))
 \end{align*}
 where $\theta(x, y_c)$ is a feature vector derived from the global inputs $x$
-and the local set of labels $y_c$.
+and the local set of labels $y_c$. $Z$ represents a normalization factor and
+$\phi$ denotes the feature function. 
 
 CRF is trained using a maximum conditional likelihood estimation. For a
 training set $\{(x_i, y_i)\}$, the logarithm of the likelihood is given by:
 \begin{align*}
-    L(w) = \sum_i \log p(y | x; w)
+    \bm{L(w)} = \sum_i \log p(y | x; w)
 \end{align*}
 
 Training procedure chooses parameters such that the log-likelihood is
@@ -113,15 +115,15 @@ maximized.
 Decoding is defined as a search for the label sequence $y^*$ with the highest
 conditional probability:
 \begin{align*}
-    y^* &= \arg\max\limits_{y \in \gamma(x)} p(y | x; w)
+    \bm{y^*} &= \arg\max\limits_{y \in \gamma(x)} p(y | x; w)
 \end{align*}
 where $\gamma(x)$ denotes the set of possible label sequences for $x$.
-The main network architecture can be seen in Figure \ref{fig:pipeline}.
+The main network architecture can be seen in Figure~\ref{fig:pipeline}.
 
 \begin{figure}
   \caption{The main network architecture. Dashed layers indicate dropout layers
   applied both on the input and output vectors of Bi-LSTM. Word and character
-  embeddings are concatenated before inputed in the Bi-LSTM}
+  embeddings are concatenated before inputed in the Bi-LSTM \cite{ma2016end}}
   \label{fig:pipeline}
   \centering
     \includegraphics[width=0.6\textwidth]{pipeline.png}
